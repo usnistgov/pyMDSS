@@ -1,0 +1,32 @@
+{% load static %}
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title> MDSS </title>
+    <!-- Bootstrap core CSS -->
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'css/main.css' %}" rel="stylesheet">
+    <!-- Custom styles for this template -->
+  </head>
+
+  <body>
+    {% include 'navbar.html' %}
+  <main role="main" class="col-md-1 ml-sm-auto col-lg-10 pt-3 px-4">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+      <h2 style="padding-left: 20vw;"> Welcome to MDSS: {% block title%} {% endblock %}</h2>
+    </div>
+  </main>
+  <div style="padding-left: 20vw;">
+    {% block content %}
+    {% endblock %}
+  </div>
+  <!-- Placed at the end of the document so the pages load faster -->
+  <script src="{% static 'js/popper.min.js' %}"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="{% static 'js/bootstrap.min.js' %}"></script>
+  <script src="{% static 'js/main.js' %}"></script>
+  </body>
+</html>

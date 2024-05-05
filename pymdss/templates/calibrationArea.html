@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %} Calibration Area {% endblock %}
+{% block content %}
+    
+<form enctype="multipart/form-data" action= "{% url 'search' %}" method="post">
+    {% csrf_token %}
+    <p>Standard Resistor Search Feature</p>
+    <input type="submit" value="GO"/>
+</form>
+<form enctype="multipart/form-data" action= "{% url 'upload' %}" method="post">
+    {% csrf_token %}
+    <h6>Upload test points</h6>
+    <input type="submit" value="GO"/>
+</form>
+{% endblock %}

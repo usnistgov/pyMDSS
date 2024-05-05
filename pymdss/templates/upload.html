@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %} Upload test points {% endblock %}
+
+{% block content %}
+<form enctype="multipart/form-data" method="post" action= "{% url 'upload' %}">
+{% csrf_token %}
+<h6>Upload Test points</h6> <input type="file" name="mdss_data_file[]" multiple>
+<button type="submit">Upload File</button>
+<br><br>
+<h6>Uploaded File:</h6>
+{% for f in fdata %}
+    {% for fn in f %}
+        <em>{{fn}}</em><br>
+    {% endfor %}
+{% endfor %}
+</form>
+{% endblock %}
