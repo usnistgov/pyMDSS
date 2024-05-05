@@ -1,15 +1,16 @@
 {% extends 'base.html' %}
 {% block title %} Calibration Area {% endblock %}
-{% block content %}
-    
-<form enctype="multipart/form-data" action= "{% url 'search' %}" method="post">
+{% block content %}  
+</br></br>
+<form class="col-md-6 offset-md-1" enctype="multipart/form-data" action= "{% url 'search' %}" method="post">
     {% csrf_token %}
-    <p>Standard Resistor Search Feature</p>
-    <input type="submit" value="GO"/>
+    <h4>Standard Resistor Search Feature</h4>
+    <input type="submit" value="Search" class="btn btn-secondary btn-lg"/>
 </form>
-<form enctype="multipart/form-data" action= "{% url 'upload' %}" method="post">
+</br>
+<form class="col-md-6 offset-md-1" enctype="multipart/form-data" action= "{% url 'upload' %}" method="post">
     {% csrf_token %}
-    <h6>Upload test points</h6>
-    <input type="submit" value="GO"/>
+    <h4>Upload test points</h4>
+    <input type="submit" value="Upload" class="btn btn-secondary btn-lg"/>
 </form>
 {% endblock %}

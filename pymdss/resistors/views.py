@@ -14,6 +14,9 @@ from django.db import connections
 from django.db.utils import OperationalError
 import xlsxwriter
 import mysql.connector
+from django.contrib.auth import authenticate, login, logout
+from django.contrib import messages
+
 # Create your views here.
 
 def process(request):
@@ -21,6 +24,26 @@ def process(request):
     
 def index(request):
     return render(request, 'index.html')
+
+def home(request):
+    if request.method == 'POST':
+        username = request.POST['username']
+        password = request.POST['password']
+        # Authenticate
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            messages.success(request, "You are logged in...")
+            return redirect('selectCalibrationArea')
+        else:
+            messages.success(request, "There was an error loggin in...")
+            return redirect('home')
+    return render(request, 'home.html', {})
+
+def logout_user(request):
+    logout(request)
+    messages.success(request, "You are logged out...")
+    return redirect('home')
 
 def selectCalibrationArea(request):
     return render(request, 'selectCalibrationArea.html')

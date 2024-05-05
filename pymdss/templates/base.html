@@ -13,13 +13,21 @@
   </head>
 
   <body>
-    {% include 'navbar.html' %}
   <main role="main" class="col-md-1 ml-sm-auto col-lg-10 pt-3 px-4">
-    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
-      <h2 style="padding-left: 20vw;"> Welcome to MDSS: {% block title%} {% endblock %}</h2>
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom col-md-6 offset-md-6">
+      <h2> Welcome to MDSS {% block title%} {% endblock %}</h2>
     </div>
   </main>
-  <div style="padding-left: 20vw;">
+  {% include 'navbar.html' %}
+  <div>
+    {% if messages%}
+      {% for message in messages %}
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <strong>{{message}}</strong>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
     {% block content %}
     {% endblock %}
   </div>

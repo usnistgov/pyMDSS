@@ -1,55 +1,34 @@
 {% load static %}
-<nav class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0">
-  <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#">NIST-PML</a>
-  <ul class="navbar-nav px-3">
-    <li class="nav-item text-nowrap">
-      <a class="nav-link" href="login.html">Log out</a>
-    </li>
-  </ul>
-</nav>
-<div class="container-fluid">
-  <div class="row">
-      <nav class="col-md-2 d-none d-md-block bg-light sidebar">
-        <div class="sidebar-sticky">
-          <ul class="nav flex-column">
-            <li class="nav-item">
-              <a class="nav-link active" href="#">
-                <span data-feather="home"></span>
-                MDSS
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="http://127.0.0.1:8000/home">
-                <span data-feather="file"></span>
-                Home
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="http://127.0.0.1:8000/admin">
-                <span data-feather="shopping-cart"></span>
-                Admin
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="http://127.0.0.1:8000/selectCalibrationArea">
-                <span data-feather="users"></span>
-                 Select Calibration Area
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="http://127.0.0.1:8000/documentation">
-                <span data-feather="bar-chart-2"></span>
-                Documentation
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">
-                <span data-feather="layers"></span>
-                Logout
-              </a>
-            </li>
-          </ul>
-        </div>
-      </nav>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <divS class="container-fluid">
+    <a class="navbar-brand" href="{% url 'home' %}">MDSS</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        {% if user.is_authenticated %}
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'selectCalibrationArea' %}">Select Calibration Area</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'admin:index' %}">Admin</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'documentation' %}">Documentation</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+        </li>
+        {% else %}
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'home' %}">Login</a>
+        </li>
+        {% endif %}
+
+      </ul>
     </div>
   </div>
+</nav>
+
+  
