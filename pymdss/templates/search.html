@@ -1,10 +1,9 @@
 {% extends 'base.html'%}
 {% block title%} Search Standard resistors {% endblock %}
-{% load crispy_forms_tags %}
 {% block content %}
-<form action="{% url 'search' %}" method="post" enctype="multipart/form-data">
+<form method="post" action="{% url 'search' %}" >
     {% csrf_token %}
-    {{ form|crispy }} <br><br>
+    {{ form.as_table }} <br><br>
     <button type="submit" action='.' value="download" name="download">Download</button> 
 </form>
 {% endblock %}

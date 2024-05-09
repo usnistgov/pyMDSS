@@ -7,9 +7,9 @@
 <br>
 <h6>Add New Document</h6>
 <p>Select files to upload</p>
-<form method="post" enctype="multipart/form-data">
+<form method="post" action="{% url 'documentation' %}">
     {% csrf_token %}
-    {{ form }} <br><br>
+    {{ form.as_p }} <br><br>
     <input type="file" name="documentation"> 
     <button type="submit">Upload File</button>
 </form>

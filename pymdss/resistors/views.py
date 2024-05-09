@@ -1,13 +1,15 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, HttpResponsePermanentRedirect
-from .models import Magnicon_CCC_Process, Thomas_Process, document, search_standard_resistor
+from .models import Magnicon_CCC_Process, Thomas_Process, Warshawsky_Process, \
+                    Scaling_CCC_Process, \
+                    document, search_standard_resistor
 from django.core.files.storage import FileSystemStorage
 from .forms import documentation_form, calibration_area_form, search_standard_resistor_form
 from resistors.data_handler import delete_records
 from django.views import View
 import csv, uuid, random
 from django.views.generic.edit import FormView
-from .admin import PostMagniconCCC
+#from .admin import PostMagniconCCC
 from django.shortcuts import get_object_or_404
 from django.http import FileResponse
 from django.db import connections
@@ -16,9 +18,12 @@ import xlsxwriter
 import mysql.connector
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
+# Save the workbook to a BytesIO buffer
+from io import BytesIO
+import openpyxl
+from datetime import datetime
 
 # Create your views here.
-
 def process(request):
     return render(request, 'process.html')
     
@@ -63,7 +68,63 @@ def upload(request):
         mdss_data_form = calibration_area_form()
     return render(request, 'upload.html')
 
+def handle_uploaded_file(myform, myfile):
+    s_list = []
+    my_slist = []
+    all_files = []
+    all_files_size = []
+    all_files_type = []
+    db_conn = connections['default']
+    cursor = db_conn.cursor()
+    
+    for files in myfile:
+        all_files.append(files) # get the filename...
+        all_files_size.append(files.size) # get the filesize...
+        all_files_type.append(files.content_type) # get the file type
+        query = """INSERT INTO resistors_filename (id, date_uploaded, uploaded_filename) VALUES (%s, %s, %s)"""
+        cursor.execute(query, (str(random.randint(0, 65535)), datetime.now().strftime("%d%m%Y_%H%M%S"), files))
+        # read file 
+        for lines in files.__iter__():
+            s_list.append(str(random.randint(0, 65535)))
+            s_list.extend(((lines.decode('utf-8')).split('|')))
+            my_slist.append(s_list)
+            s_list = []
+        #print (my_slist)
+        for i in my_slist:
+            if i[-2] == 'Magnicon CCC Process':
+                print('In magnicon ccc process')
+                myobj = Magnicon_CCC_Process(*i)
+                myobj.save()
+                #delete_records(magnicon_ccc)
+            elif i[-2] == 'Thomas Process':
+                print("In thomas process...")
+                print(i)
+                myobj = Thomas_Process(*i)
+                myobj.save()
+                #delete_records(thomas_dcc)
+            elif i[-2] == 'Scaling CCC Process':
+                myobj = Scaling_CCC_Process(*i)
+                myobj.save()
+            elif i[-2] == 'Warshawsky Process':
+                myobj = Warshawsky_Process(*i)
+                myobj.save()
+            elif i[-2] == 'MI 6010C Process':
+                myobj = MI_6010C_Process(*i)
+                myobj.save()
+            elif i[-2] == 'MI 6010B Process':
+                myobj = MI_6010B_Process(*i)
+                myobj.save()
+        myform.save(commit = False)
+    fmeta = []
+    cursor.close()
+    for fn, fs, ft in zip(all_files, all_files_size, all_files_type):
+        fmeta.append([fn, fs, ft])
+    return (fmeta)
+
 def search(request):
+    """
+    Handle's client request for searching...
+    """
     if request.method == 'POST':
         search_data_form = search_standard_resistor_form(request.POST)
         for field in search_data_form:
@@ -73,17 +134,21 @@ def search(request):
             serial = search_data_form.cleaned_data['serial']
             process_name = search_data_form.cleaned_data['process_name']
             service_id = search_data_form.cleaned_data['service_id']
-            print(serial, process_name, service_id)
-            if serial != '' or process_name != '' or service_id != '':
+            format = search_data_form.cleaned_data['format']
+            #print(serial, process_name, service_id)
+            if serial != '' or process_name != '' or service_id != '' or format != '':
                 mydict = {'Serial': serial,
                           'Process': process_name,
-                          'Service ID': service_id}
-                fetch_data(mydict)
+                          'Service ID': service_id,
+                          'Format': format,}
+                response = fetch_data(mydict)
+                return(response)
             else:
+                return redirect('.')
                 pass
             # Assuming you want to redirect or do something after successful form submission
             # Replace 'redirect_url' with the actual URL you want to redirect to.
-            return redirect('.')
+            
     else:
         # Handle GET request, just render the empty form
         search_data_form = search_standard_resistor_form()
@@ -95,35 +160,38 @@ def get_all_tables():
     cursor = db_conn.cursor()
     cursor.execute(query)
     tables = [table[0] for table in cursor.fetchall()]
+    cursor.close()
     return(tables)
 
 def fetch_data(mydict):
     db_conn = connections['default']
     keys = list(mydict.keys())
-    values = list(mydict.values())
-    print(keys, values)
-    keyword_1 = values[0]
-    keyword_2 = values[1]
-    keyword_3 = values[2]
+    search_params = list(mydict.values())
+    keyword_1 = search_params[0]
+    keyword_2 = search_params[1]
+    keyword_3 = search_params[2]
     tables = get_all_tables()
     cursor = db_conn.cursor()
     results = []
-    
+    table_names = []
     for table in tables:
-        if  table.startswith('resistors'):
+        if  table.startswith('resistors') and \
+            table != ('resistors_search_standard_resistor') and \
+            table != ('resistors_document'):
             i=1
-            print("Table name: ", table)
+            #print("Table name: ", table)
             cursor.execute(f"DESCRIBE {table}")
             columns = [column[0] for column in cursor.fetchall()]
             param = []
-            for val in values:
+            for val in search_params:
                 if val:
                     i+=1
                     param.append(f"%{val}%")
-            print("Column names: ", columns)
+            #print("Column names: ", columns)
             param_final = param*len(columns)
             query = "SELECT * FROM {} WHERE ".format(table)
             conditions = []
+            # Generate the mysql query...
             for column in columns:
                 #for key in keys:
                     #if column.upper() == key:
@@ -135,16 +203,20 @@ def fetch_data(mydict):
             query += " OR ".join(conditions)
             param_final =  tuple(param_final)
             #param = (f"%{keyword_1}%", f"%{keyword_2}%", )*len(columns)
-            print(query)
-            print (param_final)
+            #print(query)
+            #print (param_final)
+            # execute the mysql query and fetch the results...
             cursor.execute(query, param_final)
             table_results = cursor.fetchall()
             results.extend(table_results)
-    
+            #print (table_results)
+            if table_results != ():
+                table_names.append(table)
     header = [row[0] for row in cursor.description]
     cursor.close()
-    export(header, results)
-    return header, results
+    #export_xlsxwriter(header, results, mydict, table_names)
+    response = export_openpyxl(header, results, mydict, table_names)
+    return response
     # Fetch results
     #results = cursor.fetchall()
 
@@ -154,31 +226,73 @@ def fetch_table_data(table_name):
     cursor.execute('select * from ' + table_name)
     header = [row[0] for row in cursor.description]
     rows = cursor.fetchall()
+    cursor.close()
     return header, rows
 
-def export(header, rows):
+def export_xlsxwriter(header, rows, search_params, table_names):
     # Create an new Excel file and add a worksheet.
-    workbook = xlsxwriter.Workbook('Standard Resistor' + '.csv')
-    worksheet = workbook.add_worksheet('SD')
-    # Create style for cells
-    header_cell_format = workbook.add_format({'bold': True, 'border': True, 'bg_color': 'yellow'})
-    body_cell_format = workbook.add_format({'border': True})
-    row_index = 0
-    column_index = 0
-    for column_name in header:
-        worksheet.write(row_index, column_index, column_name, header_cell_format)
-        column_index += 1
-    row_index += 1
-    for row in rows:
+    if search_params['Format'] == '':
+        search_params['Format'] = '.csv'
+    if search_params['Format'] == '.csv' or search_params['Format'] == '.xlsx' or search_params['Format'] == '.xls':
+        workbook = xlsxwriter.Workbook('C:/Users/ohm/Downloads/' + 'Standard Resistor' + search_params['Format'])
+        worksheet = workbook.add_worksheet(search_params['Serial'])
+        # Create style for cells
+        #header_cell_format = workbook.add_format({'bold': True, 'border': True, 'bg_color': 'yellow'})
+        #body_cell_format = workbook.add_format({'border': True})
+        row_index = 0
         column_index = 0
-        for column in row:
-            worksheet.write(row_index, column_index, column, body_cell_format)
+        for tables in table_names:
+            worksheet.write(row_index, column_index, tables)
+            row_index += 1
             column_index += 1
-        row_index += 1
+            for column_name in header:
+                worksheet.write(row_index, column_index, column_name)
+                column_index += 1
+            row_index += 1
+            for row in rows:
+                column_index = 0
+                for column in row:
+                    worksheet.write(row_index, column_index, column)
+                    column_index += 1
+                row_index += 1
+            print(str(row_index) + ' rows written successfully to ' + workbook.filename)
+        # Closing workbook
+        workbook.close()
 
-    print(str(row_index) + ' rows written successfully to ' + workbook.filename)
-    # Closing workbook
-    workbook.close()
+def export_openpyxl(header, rows, search_params, table_names):
+    # Create a new Excel workbook
+    workbook = openpyxl.Workbook()
+    worksheet = workbook.active
+     # Create an new Excel file and add a worksheet.
+    if search_params['Format'] == '':
+        search_params['Format'] = '.csv'
+    if search_params['Format'] == '.csv' or search_params['Format'] == '.xlsx' or search_params['Format'] == '.xls':
+        row_index = 1
+        column_index = 1
+        for tables in table_names:
+            worksheet.cell(row_index, column_index).value = tables
+            row_index += 1
+            column_index += 1
+            for column_name in header:
+                worksheet.cell(row_index, column_index).value = column_name
+                column_index += 1
+            row_index += 1
+            for row in rows:
+                column_index = 1
+                for column in row:
+                    worksheet.cell(row_index, column_index).value = column
+                    column_index += 1
+                row_index += 1
+        #workbook.save()
+        # Save the workbook to a BytesIO buffer
+        buffer = BytesIO()
+        workbook.save(buffer)
+        buffer.seek(0)
+        # Create the HttpResponse object with the appropriate MIME type
+        response = HttpResponse(buffer, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        # Set content disposition to force browser to download file
+        response['Content-Disposition'] = 'attachment; filename="StandardResistor.xlsx"'
+    return response 
 
 def calibrationArea(request):
     return render(request, 'calibrationArea.html')
@@ -193,38 +307,3 @@ def documentation(request):
     else:
         myform = documentation_form()
     return render(request, 'documentation.html', {'form': myform})
-    
-def handle_uploaded_file(myform, myfile):
-    print("In function handle_uploaded_file()")
-    s_list = []
-    my_slist = []
-    all_files = []
-    all_files_size = []
-    all_files_type = []
-    for files in myfile:
-        all_files.append(files)
-        all_files_size.append(files.size)
-        all_files_type.append(files.content_type)
-        # read file 
-        for lines in files.__iter__():
-            s_list.append(str(random.randint(0, 65535)))
-            s_list.extend((lines.decode('utf-8')).split('|'))
-            my_slist.append(s_list)
-            s_list = []
-        #print (my_slist)
-        for i in my_slist:
-            if i[-2] == 'Magnicon CCC Process':
-                print('In magnicon ccc process')
-                myobj = Magnicon_CCC_Process(*i)
-                myobj.save()
-                #delete_records(magnicon_ccc)
-            elif i[-2] == 'Thomas Process':
-                myobj = Thomas_Process(*i)
-                myobj.save()
-                #delete_records(thomas_dcc)
-        myform.save(commit = False)
-    fmeta = []
-    for fn, fs, ft in zip(all_files, all_files_size, all_files_type):
-        fmeta.append([fn, fs, ft])
-    
-    return (fmeta)

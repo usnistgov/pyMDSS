@@ -4,10 +4,11 @@
 {% block content %}
 <form enctype="multipart/form-data" method="post" action= "{% url 'upload' %}">
 {% csrf_token %}
+<br>
 <h6>Upload Test points</h6> <input type="file" name="mdss_data_file[]" multiple>
-<button type="submit">Upload File</button>
+<button class="btn btn-secondary" type="submit">Upload File</button>
 <br><br>
-<h6>Uploaded File:</h6>
+<h6>Uploaded Files:</h6>
 {% for f in fdata %}
     {% for fn in f %}
         <em>{{fn}}</em><br>

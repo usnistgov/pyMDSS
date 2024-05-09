@@ -14,12 +14,12 @@
 
   <body>
   <main role="main" class="col-md-1 ml-sm-auto col-lg-10 pt-3 px-4">
-    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom col-md-6 offset-md-6">
+    <div class="justify-content-between flex-wrap flex-md-nowrap border-bottom col-md-6 offset-md-6">
       <h2> Welcome to MDSS {% block title%} {% endblock %}</h2>
     </div>
   </main>
   {% include 'navbar.html' %}
-  <div>
+  <div class="col-md-12 offset-md-1">
     {% if messages%}
       {% for message in messages %}
         <div class="alert alert-warning alert-dismissible fade show" role="alert">
@@ -29,6 +29,7 @@
       {% endfor %}
     {% endif %}
     {% block content %}
+    
     {% endblock %}
   </div>
   <!-- Placed at the end of the document so the pages load faster -->

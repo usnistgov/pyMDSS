@@ -7,6 +7,13 @@
 # Feel free to rename the models, but don't rename db_table values or field names.
 from django.db import models
 
+class filename(models.Model):
+    date_uploaded = models.CharField(max_length=30, null=False, blank=True)
+    uploaded_filename = models.CharField(max_length=50, null=False, blank=True)
+
+    def __str__(self):
+        return(self.uploaded_filename)
+
 class document(models.Model):
     """
     [Documentation]
@@ -15,7 +22,7 @@ class document(models.Model):
         models ([type]): [description]
     """
     filename = models.CharField(db_column='Filename', max_length=100, null=False)
-    description = models.CharField(db_column='File Description', max_length=500, null=False)
+    description = models.TextField(db_column='File Description', null=False, blank=True)
 
     def __str__(self):
         return self.filename
@@ -26,12 +33,12 @@ class search_standard_resistor(models.Model):
     Args:
         models ([type]): [description]
     """
-    serial = models.CharField(db_column='Serial', max_length=100, null=False, blank=True)
-    model_no = models.CharField(db_column='Model', max_length=100, null=False, blank=True)
-    std_manufacturer = models.CharField(db_column='Standard Manufacturer', max_length=100, null=False, blank=True)
-    service_id = models.CharField(db_column='Service Id', max_length=100, null=False, blank=True)
-    process_name = models.CharField(db_column='Process name', max_length=100, null=False, blank=True)
-    format = models.CharField(db_column='Format', max_length=100, null=False, blank=True)
+    serial = models.CharField(db_column='Serial', max_length=20, null=False, blank=True)
+    model_no = models.CharField(db_column='Model', max_length=20, null=False, blank=True)
+    std_manufacturer = models.CharField(db_column='Standard Manufacturer', max_length=20, null=False, blank=True)
+    service_id = models.CharField(db_column='Service Id', max_length=20, null=False, blank=True)
+    process_name = models.CharField(db_column='Process name', max_length=30, null=False, blank=True)
+    format = models.CharField(db_column='Format', max_length=10, null=False, blank=True)
 
     def __str__(self):
         return self.serial
@@ -149,3 +156,84 @@ class Scaling_CCC_Process(models.Model):
     
     def __str__(self):
         return self.process
+    
+class Warshawsky_Process(models.Model):
+    nominal = models.FloatField(db_column='Nominal', blank=True, null=False)
+    comments = models.CharField(db_column='Comments', max_length=200, blank=True, null=False)
+    date = models.CharField(db_column='Date', blank=True, max_length=100)
+    meas_voltage = models.FloatField(db_column='Meas Voltage', blank=True, null=False)
+    dummy = models.FloatField(db_column='Dummy', blank=True, null=False)
+    meas_position = models.FloatField(db_column='Meas Position', blank=True, null=False)
+    serial = models.CharField(db_column='Serial', max_length=20, blank=True, null=False)
+    meas_function = models.CharField(db_column='Meas Function', max_length=5, blank=True, null=False)
+    c = models.FloatField(db_column='C', blank=True, null=False)
+    sd_c_field = models.FloatField(db_column='SD (C)', blank=True, null=False)
+    pred_c_field = models.FloatField(db_column='Pred (C)', blank=True, null=False)
+    unknown_temp = models.FloatField(db_column='Meas Temp', blank=True, null=False)
+    room_rh = models.FloatField(db_column='RH', blank=True, null=False)
+    pressure = models.FloatField(db_column='Pressure', blank=True, null=False)
+    sense_avg = models.FloatField(db_column='Sens Avg', blank=True, null=False)
+    sensitivity = models.FloatField(db_column='Sensitivity', blank=True, null=False)
+    guard = models.FloatField(db_column='Guard', blank=True, null=False)
+    c_pred = models.FloatField(db_column='C-Pred', blank=True, null=False)
+    range = models.FloatField(db_column='Range', blank=True, null=False)
+    ref_tcr = models.FloatField(db_column='TCR Corr', blank=True, null=False)
+    ref_pcr = models.FloatField(db_column='PCR Corr', blank=True, null=False)
+    system_id = models.CharField(db_column='System ID', blank=True, max_length=100)
+    service_id = models.CharField(db_column='Service ID', blank=True, max_length=20)
+    process = models.CharField(db_column='Process', max_length=100, blank=True, null=False)
+    area = models.CharField(db_column='Area', max_length=20, blank=True, null=False)
+    
+    def __str__(self):
+        return self.process
+"""
+class MI_6010C_Process(models.Model):
+    nominal = models.FloatField(db_column='Nominal (ohm)', blank=True, null=False)
+    date = models.CharField(db_column='Date', blank=True, max_length=100)
+    end_time = models.CharField(db_column='End Time', max_length=100, blank=True, null=False)
+    meas_current = models.FloatField(db_column='Meas Current (A)', blank=True, null=False)
+    meas_delay = models.FloatField(db_column='Meas Delay (s)', blank=True, null=False)
+    meas_temp = models.FloatField(db_column='Meas Temp (C)', blank=True, null=False)
+    reference_sn = models.CharField(db_column='Reference SN', max_length=45, blank=True, null=False)
+    serial = models.CharField(db_column='Serial', max_length=20, blank=True, null=False)
+    ratio = models.FloatField(db_column='Ratio', blank=True, null=False)
+    sd_c_field = models.FloatField(db_column='SD (C) (ppm)', blank=True, null=False)
+    mi_stats = models.CharField(db_column='MI Stats', max_length=20, blank=True, null=False)
+    r = models.FloatField(db_column=' R (ohm)', blank=True, null=False)
+    system_id = models.CharField(db_column='System ID', max_length=10, blank=True, null=False)
+    comments = models.TextField(db_column='Comments', blank=True, null=False)
+    mi_range = models.CharField(db_column='MI Range', max_length=50, blank=True, null=False)
+    mi_channels = models.CharField(db_column='MI Channels', max_length=50, blank=True, null=False)
+    mi_components = models.CharField(db_column='MI Components', max_length=100, blank=True, null=False)
+    service_id = models.CharField(db_column='Service ID', blank=True, max_length=20)
+    process = models.CharField(db_column='Process', max_length=100, blank=True, null=False)
+    area = models.CharField(db_column='Area', max_length=20, blank=True, null=False)
+
+    def __str__(self):
+        return self.process
+
+class MI_6010B_Process(models.Model):
+    nominal = models.FloatField(db_column='Nominal (ohm)', blank=True, null=False)
+    date = models.CharField(db_column='Date', blank=True, max_length=100)
+    end_time = models.CharField(db_column='End Time', max_length=100, blank=True, null=False)
+    meas_current = models.FloatField(db_column='Meas Current (A)', blank=True, null=False)
+    meas_delay = models.FloatField(db_column='Meas Delay (s)', blank=True, null=False)
+    meas_temp = models.FloatField(db_column='Meas Temp (C)', blank=True, null=False)
+    reference_sn = models.CharField(db_column='Reference SN', max_length=45, blank=True, null=False)
+    serial = models.CharField(db_column='Serial', max_length=20, blank=True, null=False)
+    ratio = models.FloatField(db_column='Ratio', blank=True, null=False)
+    sd_c_field = models.FloatField(db_column='SD (C) (ppm)', blank=True, null=False)
+    mi_stats = models.CharField(db_column='MI Stats', max_length=20, blank=True, null=False)
+    r = models.FloatField(db_column=' R (ohm)', blank=True, null=False)
+    system_id = models.CharField(db_column='System ID', max_length=10, blank=True, null=False)
+    comments = models.TextField(db_column='Comments', blank=True, null=False)
+    mi_range = models.CharField(db_column='MI Range', max_length=50, blank=True, null=False)
+    mi_channels = models.CharField(db_column='MI Channels', max_length=50, blank=True, null=False)
+    mi_components = models.CharField(db_column='MI Components', max_length=100, blank=True, null=False)
+    service_id = models.CharField(db_column='Service ID', blank=True, max_length=20)
+    process = models.CharField(db_column='Process', max_length=100, blank=True, null=False)
+    area = models.CharField(db_column='Area', max_length=20, blank=True, null=False)
+
+    def __str__(self):
+        return self.process
+"""

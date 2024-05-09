@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 from pathlib import Path
 import os
 from dotenv import load_dotenv
+from socket import gethostname, gethostbyname
 
 load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -28,7 +29,11 @@ SECRET_KEY = 'django-insecure-_b$$cn--cm5q@kzi6tc58ah#f)6ts0shnj7mkzc7i23p12$xy1
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [ gethostname(), gethostbyname(gethostname()),
+                 '127.0.0.1',
+                 '129.6.124.233',
+                 '129.6.124.172',
+                ] 
 
 
 # Application definition
@@ -40,15 +45,15 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'import_export',
+    #'import_export',
     'resistors',
     'django_extensions',
-    'crispy_forms',
-    "crispy_bootstrap4",
+    #'crispy_forms',
+    #"crispy_bootstrap4",
 ]
 
-CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap4"
-CRISPY_TEMPLATE_PACK = "bootstrap4"
+#CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap4"
+#CRISPY_TEMPLATE_PACK = "bootstrap4"
     
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -139,3 +144,4 @@ MEDIA_URL = '/media/'
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+DATA_UPLOAD_MAX_NUMBER_FILES = 1000

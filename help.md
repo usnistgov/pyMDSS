@@ -25,9 +25,11 @@ pip install django-crispy-forms`
         'PORT': '3306',
     }
 }`
+CREATE DATABASE mdss
+GRANT ALL PRIVILEGES ON *.* TO 'mdss_user'@'localhost' WITH GRANT OPTION;
 `python manage.py makemigrations`
 `python manage.py migrate`
-`python manage.py runserver`
+`python manage.py runserver $server ip or localhost$`
 
 ### Create superuser:
 `python manage.py createsuperuser`
@@ -48,3 +50,5 @@ pip install django-crispy-forms`
 
 ### remove db from app
 `python manage.py flush $appname$`
+or if you have django-extensions
+`python manage.py reset_db`
