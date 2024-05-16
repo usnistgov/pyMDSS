@@ -9,10 +9,12 @@
 <button class="btn btn-secondary" type="submit">Upload File</button>
 <br><br>
 <h6>Uploaded Files:</h6>
-{% for f in fdata %}
-    {% for fn in f %}
-        <em>{{fn}}</em><br>
+{% for fn in fdata %}
+    {% for f in fn %}
+        <em>{{f}}&nbsp;</em>
     {% endfor %}
+    <br>
 {% endfor %}
+
 </form>
 {% endblock %}

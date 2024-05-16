@@ -33,6 +33,7 @@ ALLOWED_HOSTS = [ gethostname(), gethostbyname(gethostname()),
                  '127.0.0.1',
                  '129.6.124.233',
                  '129.6.124.172',
+                 'pn126904.campus.nist.gov',
                 ] 
 
 
@@ -144,4 +145,4 @@ MEDIA_URL = '/media/'
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-DATA_UPLOAD_MAX_NUMBER_FILES = 1000
+DATA_UPLOAD_MAX_NUMBER_FILES = 5000

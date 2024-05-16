@@ -1,7 +1,9 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, HttpResponsePermanentRedirect
 from .models import Magnicon_CCC_Process, Thomas_Process, Warshawsky_Process, \
-                    Scaling_CCC_Process, \
+                    Scaling_CCC_Process, NIST_AAB_Process, MI_6010B_Process, \
+                    MI_6010C_Process, MI_6010Q_Process, MI_6020Q_Process, \
+                    MI_6010SW_Process, MI_6000B_Process, HR3100_Process, \
                     document, search_standard_resistor
 from django.core.files.storage import FileSystemStorage
 from .forms import documentation_form, calibration_area_form, search_standard_resistor_form
@@ -57,7 +59,7 @@ def upload(request):
     if request.method == 'POST':
         #delete_records(magnicon_ccc)
         #delete_records(thomas_dcc)
-        print('My file:', request.FILES.getlist('mdss_data_file[]', False))
+        #print('My file:', request.FILES.getlist('mdss_data_file[]', False))
         mdss_data_form = calibration_area_form(request.POST, request.FILES)
         if mdss_data_form.is_valid() and request.FILES.getlist('mdss_data_file[]', False) != False:
             # if file is uploaded, then handle the file.
@@ -68,57 +70,115 @@ def upload(request):
         mdss_data_form = calibration_area_form()
     return render(request, 'upload.html')
 
+def check_duplicate(myfile):
+    #print(myfile)
+    db_conn = connections['default']
+    cursor = db_conn.cursor()
+    query  = """SELECT uploaded_filename FROM resistors_filename WHERE uploaded_filename = "{}" """.format(myfile)
+    cursor.execute(query)
+    result = cursor.fetchall()
+    num_rows = cursor.rowcount
+    #print(result, num_rows)
+    cursor.close()
+    if num_rows > 0:
+        return True
+    else:
+        return False
+
 def handle_uploaded_file(myform, myfile):
     s_list = []
     my_slist = []
     all_files = []
     all_files_size = []
     all_files_type = []
+    msg = []
+    fmeta = []
     db_conn = connections['default']
     cursor = db_conn.cursor()
-    
+    #print(myfile)
     for files in myfile:
         all_files.append(files) # get the filename...
         all_files_size.append(files.size) # get the filesize...
         all_files_type.append(files.content_type) # get the file type
-        query = """INSERT INTO resistors_filename (id, date_uploaded, uploaded_filename) VALUES (%s, %s, %s)"""
-        cursor.execute(query, (str(random.randint(0, 65535)), datetime.now().strftime("%d%m%Y_%H%M%S"), files))
-        # read file 
-        for lines in files.__iter__():
-            s_list.append(str(random.randint(0, 65535)))
-            s_list.extend(((lines.decode('utf-8')).split('|')))
-            my_slist.append(s_list)
-            s_list = []
-        #print (my_slist)
-        for i in my_slist:
-            if i[-2] == 'Magnicon CCC Process':
-                print('In magnicon ccc process')
-                myobj = Magnicon_CCC_Process(*i)
-                myobj.save()
-                #delete_records(magnicon_ccc)
-            elif i[-2] == 'Thomas Process':
-                print("In thomas process...")
-                print(i)
-                myobj = Thomas_Process(*i)
-                myobj.save()
-                #delete_records(thomas_dcc)
-            elif i[-2] == 'Scaling CCC Process':
-                myobj = Scaling_CCC_Process(*i)
-                myobj.save()
-            elif i[-2] == 'Warshawsky Process':
-                myobj = Warshawsky_Process(*i)
-                myobj.save()
-            elif i[-2] == 'MI 6010C Process':
-                myobj = MI_6010C_Process(*i)
-                myobj.save()
-            elif i[-2] == 'MI 6010B Process':
-                myobj = MI_6010B_Process(*i)
-                myobj.save()
-        myform.save(commit = False)
-    fmeta = []
+        duplicate = check_duplicate(files)
+        if duplicate:
+            msg.append("Skipping (Already Uploaded): ")
+            print("Skipping file: ", files)
+        else:
+            query = """INSERT INTO resistors_filename (date_uploaded, uploaded_filename) VALUES (%s, %s)"""
+            cursor.execute(query, (datetime.now().strftime("%d%m%Y_%H%M%S"), files))
+            # read file 
+            print("Uploading file: ", files)
+            for lines in files.__iter__():
+                s_list.append(None)
+                s_list.extend(((lines.decode('utf-8')).split('|')))
+                my_slist.append(s_list)
+                s_list = []
+            for i in my_slist:
+                #print(i, len(i))
+                if 'Magnicon CCC Process' in i:
+                    if (len(i) == 46):
+                        #print('In magnicon ccc process')
+                        myobj = Magnicon_CCC_Process(*i)
+                        myobj.save()
+                        #delete_records(magnicon_ccc)
+                    else:
+                        print('Values dont match', len(i))
+                elif 'Thomas Process' in i:
+                    #print('In Thomas process')
+                    myobj = Thomas_Process(*i)
+                    myobj.id = None
+                    myobj.save()
+                    #delete_records(thomas_dcc)
+                elif 'Scaling CCC Process' in i:
+                    print('In Scaling CCC process')
+                    myobj = Scaling_CCC_Process(*i)
+                    myobj.id = None
+                    myobj.save()
+                elif 'Warshawsky Process' in i:
+                    print('In Warshawsky process')
+                    myobj = Warshawsky_Process(*i)
+                    myobj.id = None
+                    myobj.save()
+                elif 'MI 6010C Process' in i:
+                    myobj = MI_6010C_Process(*i)
+                    myobj.id = None
+                    myobj.save()
+                elif 'MI 6010B Process' in i:
+                    myobj = MI_6010B_Process(*i)
+                    myobj.id = None
+                    myobj.save()
+                elif 'MI 6010SW Process' in i:
+                    myobj = MI_6010SW_Process(*i)
+                    myobj.id = None
+                    myobj.save()
+                elif 'MI 6000B Procss' in i:
+                    myobj = MI_6000B_Process(*i)
+                    myobj.id = None
+                    myobj.save()
+                elif 'MI 6010Q Process' in i:
+                    myobj = MI_6010Q_Process(*i)
+                    myobj.id = None
+                    myobj.save()
+                elif 'MI 6020Q Process' in i:
+                    myobj = MI_6020Q_Process(*i)
+                    myobj.save()
+                elif 'NIST AAB Process' in i:
+                    i.pop(-1)
+                    #print('In NIST AAB process')
+                    myobj = NIST_AAB_Process(*i)
+                    myobj.id = None
+                    myobj.save()
+                elif 'HR3100 Process' in i:
+                    myobj = HR3100_Process(*i)
+                    myobj.id = None
+                    myobj.save()
+                
+            myform.save(commit = False)
+            msg.append('Finished Uploading: ')
     cursor.close()
-    for fn, fs, ft in zip(all_files, all_files_size, all_files_type):
-        fmeta.append([fn, fs, ft])
+    for m, fn, fs, ft in zip(msg, all_files, all_files_size, all_files_type):
+        fmeta.append([m, fn, fs, ft])
     return (fmeta)
 
 def search(request):
@@ -255,7 +315,7 @@ def export_xlsxwriter(header, rows, search_params, table_names):
                     worksheet.write(row_index, column_index, column)
                     column_index += 1
                 row_index += 1
-            print(str(row_index) + ' rows written successfully to ' + workbook.filename)
+            #print(str(row_index) + ' rows written successfully to ' + workbook.filename)
         # Closing workbook
         workbook.close()
 

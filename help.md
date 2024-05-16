@@ -52,3 +52,8 @@ GRANT ALL PRIVILEGES ON *.* TO 'mdss_user'@'localhost' WITH GRANT OPTION;
 `python manage.py flush $appname$`
 or if you have django-extensions
 `python manage.py reset_db`
+* Remove/delete the migrations folder
+`python manage.py makemigrations $appname$`
+`python manage.py migrate`
+
+
