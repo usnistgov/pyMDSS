@@ -1,0 +1,7 @@
+USE mdss;
+TRUNCATE TABLE resistors_magnicon_ccc_process;
+TRUNCATE TABLE resistors_thomas_process;
+TRUNCATE TABLE resistors_filename;
+TRUNCATE TABLE resistors_scaling_ccc_process;
+TRUNCATE TABLE resistors_warshawsky_process;
+TRUNCATE TABLE resistors_nist_aab_process;
