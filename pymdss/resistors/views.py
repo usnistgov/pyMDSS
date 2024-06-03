@@ -96,7 +96,7 @@ def handle_uploaded_file(myform, myfile):
     db_conn = connections['default']
     cursor = db_conn.cursor()
     #print(myfile)
-    for files in myfile:
+    for ct, files in enumerate(myfile):
         all_files.append(files) # get the filename...
         all_files_size.append(files.size) # get the filesize...
         all_files_type.append(files.content_type) # get the file type
@@ -173,9 +173,9 @@ def handle_uploaded_file(myform, myfile):
                     myobj = HR3100_Process(*i)
                     myobj.id = None
                     myobj.save()
-                
             myform.save(commit = False)
             msg.append('Finished Uploading: ')
+        #progress_observer.set_progress(((ct+1)/len(myfile))*100)
     cursor.close()
     for m, fn, fs, ft in zip(msg, all_files, all_files_size, all_files_type):
         fmeta.append([m, fn, fs, ft])

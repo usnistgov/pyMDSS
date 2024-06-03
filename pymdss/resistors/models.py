@@ -8,8 +8,8 @@
 from django.db import models
 
 class filename(models.Model):
-    date_uploaded = models.CharField(max_length=100, null=False, blank=True)
-    uploaded_filename = models.CharField(max_length=100, null=False, blank=True)
+    date_uploaded       = models.CharField(max_length=100, null=False, blank=True)
+    uploaded_filename   = models.TextField(null=False, blank=True)
 
     def __str__(self):
         return(self.uploaded_filename)
@@ -33,12 +33,12 @@ class search_standard_resistor(models.Model):
     Args:
         models ([type]): [description]
     """
-    serial = models.CharField(db_column='Serial', max_length=20, null=False, blank=True, help_text='Serial number of the standard')
-    model_no = models.CharField(db_column='Model', max_length=20, null=False, blank=True)
-    std_manufacturer = models.CharField(db_column='Standard Manufacturer', max_length=20, null=False, blank=True)
-    service_id = models.CharField(db_column='Service Id', max_length=20, null=False, blank=True)
-    process_name = models.CharField(db_column='Process name', max_length=30, null=False, blank=True)
-    format = models.CharField(db_column='Format', max_length=10, null=False, blank=True)
+    serial              = models.CharField(db_column='Serial', max_length=20, null=False, blank=True, help_text='<em>Serial number of the standard</em>')
+    model_no            = models.CharField(db_column='Model', max_length=20, null=False, blank=True, help_text='<em>Model number of the standard</em>')
+    std_manufacturer    = models.CharField(db_column='Standard Manufacturer', max_length=20, null=False, blank=True, help_text='<em>Manufacturer of the standard</em>')
+    service_id          = models.CharField(db_column='Service Id', max_length=20, null=False, blank=True, help_text='<em>NIST Service Identification</em>')
+    process_name        = models.CharField(db_column='Process name', max_length=30, null=False, blank=True, help_text='<em>Name of the process</em>')
+    format              = models.CharField(db_column='Format', max_length=10, null=False, blank=True, help_text='<em>Download file format</em>')
 
     def __str__(self):
         return self.serial
@@ -126,9 +126,8 @@ class Thomas_Process(models.Model):
     area            = models.CharField(db_column='Area', max_length=20, blank=True, null=False)
 
     class Meta:
-        db_table_comment = "Database for Scaling CCC Process"
+        db_table_comment = "Database for Thomas 1 ohm Process"
 
-    
     def __str__(self):
         return self.process
  																					
@@ -162,8 +161,7 @@ class Scaling_CCC_Process(models.Model):
 
     def __str__(self):
         return self.process
-    
-#CCC I(FB1) (A)	CCC I(FB2) (A)	ServiceID	Process	Area	SD/sqrt(n)	R1990 (ppm)											
+										
 class HR3100_Process(models.Model):
     nominal         = models.FloatField(db_column='Nominal', blank=True, null=False)
     system_id       = models.CharField(db_column='System ID', max_length=10, blank=True, null=False)

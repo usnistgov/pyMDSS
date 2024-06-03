@@ -1,9 +1,10 @@
 {% extends 'base.html'%}
 {% block title%} Search Standard resistors {% endblock %}
 {% block content %}
-<form method="post" action="{% url 'search' %}" >
+<form class="col-md-12 offset-md-1" style="width: 30%;" method="post" action="{% url 'search' %}" >
     {% csrf_token %}
-    {{ form.as_table }} <br><br>
+    <br><br>
+    {{ form.as_p }} <br><br>
     <button type="submit" action='.' value="download" name="download">Download</button> 
 </form>
 {% endblock %}

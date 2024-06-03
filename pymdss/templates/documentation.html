@@ -2,13 +2,13 @@
 {% block title%} Documentation {% endblock %}
 
 {% block content %}
-<h6>Documents List</h6>
-<br>
-<br>
-<h6>Add New Document</h6>
-<p>Select files to upload</p>
-<form method="post" action="{% url 'documentation' %}">
+<form class="col-md-12 offset-md-1" method="post" action="{% url 'documentation' %}">
     {% csrf_token %}
+    <br><br>
+    <h6>Documents List</h6>
+    <br><br>
+    <h6>Add New Document</h6>
+    <p>Select files to upload</p>
     {{ form.as_p }} <br><br>
     <input type="file" name="documentation"> 
     <button type="submit">Upload File</button>
