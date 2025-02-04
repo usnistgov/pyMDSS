@@ -1,0 +1,15 @@
+USE mdss;
+TRUNCATE TABLE resistors_magnicon_ccc_process;
+TRUNCATE TABLE resistors_thomas_process;
+TRUNCATE TABLE resistors_filename;
+TRUNCATE TABLE resistors_scaling_ccc_process;
+TRUNCATE TABLE resistors_warshawsky_process;
+TRUNCATE TABLE resistors_nist_aab_process;
+TRUNCATE TABLE resistors_hr3100_process;
+TRUNCATE TABLE resistors_mi_6000b_process;
+TRUNCATE TABLE resistors_mi_6010b_process;
+TRUNCATE TABLE resistors_mi_6010c_process;
+TRUNCATE TABLE resistors_mi_6010q_process;
+TRUNCATE TABLE resistors_mi_6010sw_process;
+TRUNCATE TABLE resistors_mi_6020q_process;
+TRUNCATE TABLE resistors_search_standard_resistor;

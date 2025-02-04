@@ -1,5 +1,5 @@
 body {
-  font-size: .875rem;
+  font-size: 1.1rem;
 }
 
 .feather {
@@ -12,7 +12,7 @@ body {
   background-color: #4CAF50;
   color: white;
   padding: 16px;
-  font-size: 16px;
+  font-size: 1.1rem;
   border: none;
   cursor: pointer;
 }
@@ -43,6 +43,9 @@ body {
 
 /* Change color of dropdown links on hover */
 .dropdown-content a:hover {background-color: #f1f1f1}
+.dropbtn, .dropdown-content a {
+  transition: background-color 0.3s ease;
+}
 
 /* Show the dropdown menu on hover */
 .dropdown:hover .dropdown-content {
@@ -53,55 +56,6 @@ body {
 .dropdown:hover .dropbtn {
   background-color: #3e8e41;
 }
-
-/*
- * Sidebar
- */
-
-.sidebar {
-  position: fixed;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  z-index: 100; /* Behind the navbar */
-  padding: 0;
-  box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
-}
-
-.sidebar-sticky {
-  position: -webkit-sticky;
-  position: sticky;
-  top: 48px; /* Height of navbar */
-  height: calc(100vh - 48px);
-  padding-top: .5rem;
-  overflow-x: hidden;
-  overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
-}
-
-.sidebar .nav-link {
-  font-weight: 500;
-  color: #333;
-}
-
-.sidebar .nav-link .feather {
-  margin-right: 4px;
-  color: #999;
-}
-
-.sidebar .nav-link.active {
-  color: #007bff;
-}
-
-.sidebar .nav-link:hover .feather,
-.sidebar .nav-link.active .feather {
-  color: inherit;
-}
-
-.sidebar-heading {
-  font-size: .75rem;
-  text-transform: uppercase;
-}
-
 /*
  * Navbar
  */
@@ -109,8 +63,8 @@ body {
 .navbar-brand {
   padding-top: .75rem;
   padding-bottom: .75rem;
-  font-size: 1rem;
-  background-color: rgba(0, 0, 0, .25);
+  font-size: 1.4rem;
+  background-color: rgba(65, 64, 64, 0.25);
   box-shadow: inset -1px 0 0 rgba(0, 0, 0, .25);
 }
 
@@ -129,6 +83,19 @@ body {
 .form-control-dark:focus {
   border-color: transparent;
   box-shadow: 0 0 0 3px rgba(255, 255, 255, .25);
+}
+
+.footer {
+  padding: 20px 0; /* Add vertical padding */
+  min-height: 30px;
+  left: 0;
+  bottom: 2;
+  width: 100%;
+  height: 50%;
+  background-color: rgb(42, 42, 42);
+  color: rgb(255, 255, 255);
+  text-align: center;
+  position: relative;
 }
 
 /*

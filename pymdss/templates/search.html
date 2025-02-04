@@ -3,8 +3,16 @@
 {% block content %}
 <form class="col-md-12 offset-md-1" style="width: 30%;" method="post" action="{% url 'search' %}" >
     {% csrf_token %}
-    <br><br>
-    {{ form.as_p }} <br><br>
-    <button type="submit" action='.' value="download" name="download">Download</button> 
+    <br>
+    {{ form.as_p }}
+    <button type="submit" action="." onclick="window.open(new_site, '_blank')" value="download" name="download">Download</button> 
 </form>
+<script>
+let myhost = window.location.origin;
+let new_site = myhost.concat('/process')
+window.open(
+   new_site,
+  '_blank' // <- This is what makes it open in a new window.
+);
+</script>
 {% endblock %}

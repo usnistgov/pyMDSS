@@ -32,13 +32,10 @@ DEBUG = True
 ALLOWED_HOSTS = [ gethostname(), gethostbyname(gethostname()),
                  '127.0.0.1',
                  '129.6.124.233',
-                 '129.6.124.172',
+                 'pg902544.campus.nist.gov',
                  'pn126904.campus.nist.gov',
                 ] 
-
-
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -48,7 +45,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     #'import_export',
     'resistors',
+    'capacitors',
     'django_extensions',
+    'celery_progress', # celery progress bar
+    'django_celery_results', # celery results in django
     #'crispy_forms',
     #"crispy_bootstrap4",
 ]
@@ -140,6 +140,17 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 STATIC_ROOT = str(BASE_DIR.joinpath('staticfiles'))
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
+
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_RESULT_BACKEND = 'django-db'
+CELERY_CACHE_BACKEND = "django-cache"
+CELERY_RESULT_EXTENDED = True
+CELERY_TASK_TRACK_STARTED = True
+CELERY_RESULT_EXPIRES = 3600
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field

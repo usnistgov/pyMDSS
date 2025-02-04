@@ -1,16 +1,74 @@
 {% extends 'base.html'%}
 {% block title%} Documentation {% endblock %}
-
 {% block content %}
-<form class="col-md-12 offset-md-1" method="post" action="{% url 'documentation' %}">
+<form class="col-md-12 offset-md-4" method="post" action="{% url 'documentation' %}">
     {% csrf_token %}
+    <br>
+    <p>Table Statistics:</p>
+    <!--{{ form.as_p }}--> 
+    <table>
+        <caption>
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">Processes</th>
+            <th scope="col">Entries</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for c in context %}
+          <tr>
+              <th scope="row">{{c.model}}</th>
+              <td>{{c.rows}}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+        <tfoot>
+        </tfoot>
+      </table>
     <br><br>
-    <h6>Documents List</h6>
-    <br><br>
-    <h6>Add New Document</h6>
-    <p>Select files to upload</p>
-    {{ form.as_p }} <br><br>
-    <input type="file" name="documentation"> 
-    <button type="submit">Upload File</button>
+    <!--input type="file" name="documentation"> 
+    <button type="submit">Upload File</button-->
+    <div style="flex-grow:1"></div>
 </form>
+<style>
+table {
+    border-collapse: collapse;
+    border: 4px solid rgb(140 140 140);
+    font-family: sans-serif;
+    font-size: 1.2rem;
+    letter-spacing: 2px;
+  } 
+caption {
+    caption-side: bottom;
+    padding: 20px;
+    font-weight: bold;
+  }  
+thead,
+tfoot {
+    background-color: rgb(235, 242, 245);
+  }
+th,
+td {
+    border: 2px solid rgb(160 160 160);
+    padding: 15px 15px;
+  }
+td:last-of-type {
+    text-align: center;
+  }
+ 
+tbody > tr:nth-of-type(even) {
+    background-color: rgb(200, 200, 200);
+  } 
+tfoot th {
+    text-align: right;
+  }
+tfoot td {
+    font-weight: bold;
+  }
+center {
+  margin-left: auto;
+  margin-right: auto;
+}
+</style>
 {% endblock %}

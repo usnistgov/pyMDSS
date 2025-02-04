@@ -34,11 +34,12 @@ class search_standard_resistor(models.Model):
         models ([type]): [description]
     """
     serial              = models.CharField(db_column='Serial', max_length=20, null=False, blank=True, help_text='<em>Serial number of the standard</em>')
-    model_no            = models.CharField(db_column='Model', max_length=20, null=False, blank=True, help_text='<em>Model number of the standard</em>')
-    std_manufacturer    = models.CharField(db_column='Standard Manufacturer', max_length=20, null=False, blank=True, help_text='<em>Manufacturer of the standard</em>')
+    #model_no            = models.CharField(db_column='Model', max_length=20, null=False, blank=True, help_text='<em>Model number of the standard</em>')
+    #std_manufacturer    = models.CharField(db_column='Standard Manufacturer', max_length=20, null=False, blank=True, help_text='<em>Manufacturer of the standard</em>')
+    nominal             = models.CharField(db_column='Nominal', max_length=20, null=True, blank=True, help_text='<em>Nominal standard value in ohms</em>')
     service_id          = models.CharField(db_column='Service Id', max_length=20, null=False, blank=True, help_text='<em>NIST Service Identification</em>')
     process_name        = models.CharField(db_column='Process name', max_length=30, null=False, blank=True, help_text='<em>Name of the process</em>')
-    format              = models.CharField(db_column='Format', max_length=10, null=False, blank=True, help_text='<em>Download file format</em>')
+    format              = models.CharField(db_column='Format', max_length=10, null=False, blank=True, help_text='<em>Download file format (xlsx if left blank)</em>')
 
     def __str__(self):
         return self.serial
@@ -49,9 +50,9 @@ class Magnicon_CCC_Process(models.Model):
     Args:
         models ([type]): [description]
     """
-    nominal                 = models.FloatField(db_column='Nominal', blank=True, null=False)
-    date                    = models.CharField(db_column='Date', max_length=100, blank=True, null=False)  
-    end_time                = models.CharField(db_column='End Time', max_length=100, blank=True, null=False)
+    nominal                 = models.FloatField(db_column='Nominal (ohm)', blank=True, null=False)
+    date                    = models.DateTimeField(db_column='Date', blank=True, null=False)  
+    end_time                = models.DateTimeField(db_column='End Time', blank=True, null=False)
     ccc_primary_current     = models.FloatField(db_column='CCC Primary Current', blank=True, null=False)
     cycle_time              = models.FloatField(db_column='Cycle Time', blank=True, null=False)
     ccc_nominal_ratio       = models.CharField(db_column='CCC Nominal Ratio', max_length=16, blank=True, null=False)  
@@ -99,9 +100,9 @@ class Magnicon_CCC_Process(models.Model):
         return self.process
 
 class Thomas_Process(models.Model):
-    nominal         = models.FloatField(db_column='Nominal', blank=True, null=False)
+    nominal         = models.FloatField(db_column='Nominal (ohm)', blank=True, null=False)
     comments        = models.TextField(db_column='Comments', blank=True, null=False)
-    date            = models.CharField(db_column='Date', blank=True, max_length=100)
+    date            = models.DateTimeField(db_column='Date', blank=True, null=False)
     meas_voltage    = models.FloatField(db_column='Meas Voltage', blank=True, null=False)
     dummy           = models.FloatField(db_column='Dummy', blank=True, null=False)
     meas_position   = models.FloatField(db_column='Meas Position', blank=True, null=False)
@@ -110,7 +111,7 @@ class Thomas_Process(models.Model):
     c               = models.FloatField(db_column='C', blank=True, null=False)
     sd_c_field      = models.FloatField(db_column='SD (C)', blank=True, null=False)
     pred_c_field    = models.FloatField(db_column='Pred (C)', blank=True, null=False)
-    meas_temp    = models.FloatField(db_column='Meas Temp', blank=True, null=False)
+    meas_temp       = models.FloatField(db_column='Meas Temp', blank=True, null=False)
     room_rh         = models.FloatField(db_column='RH', blank=True, null=False)
     pressure        = models.FloatField(db_column='Pressure', blank=True, null=False)
     sense_avg       = models.FloatField(db_column='Sens Avg', blank=True, null=False)
@@ -132,27 +133,27 @@ class Thomas_Process(models.Model):
         return self.process
  																					
 class Scaling_CCC_Process(models.Model):
-    nominal             = models.FloatField(db_column='Nominal', blank=True, null=False)
-    system_id           = models.CharField(db_column='System ID', max_length=10, blank=True, null=False)
-    date                = models.CharField(db_column='Date', blank=True, max_length=100)
-    ccc_primary_current = models.FloatField(db_column='CCC Primary Current', blank=True, null=False)
-    meas_delay          = models.FloatField(db_column='Meas Delay', blank=True, null=False)
+    nominal             = models.FloatField(db_column='Nominal (ohm)', blank=True, null=True)
+    system_id           = models.CharField(db_column='System ID', max_length=20, blank=True, null=False)
+    date                = models.DateTimeField(db_column='Date', blank=True, null=False)
+    ccc_primary_current = models.FloatField(db_column='CCC Primary Current', blank=True, null=True)
+    meas_delay          = models.CharField(db_column='Meas Delay', max_length=20, blank=True, null=False)
     ccc_nom_ratio       = models.CharField(db_column='CCC Nom Ratio', max_length=10, blank=True, null=False)
     comments            = models.TextField(db_column='Comments', blank=True, null=False)
     serial              = models.CharField(db_column='Serial', max_length=20, blank=True, null=False)
-    c                   = models.FloatField(db_column='C', blank=True, null=False)
-    sd_c_field          = models.FloatField(db_column='SD (C)', blank=True, null=False)
-    pred_c_field        = models.FloatField(db_column='Pred (C)', blank=True, null=False)
+    c                   = models.FloatField(db_column='C', blank=True, null=True)
+    sd_c_field          = models.CharField(db_column='SD (C)', max_length=10, blank=True, null=False)
+    pred_c_field        = models.CharField(db_column='Pred (C)', max_length=20, blank=True, null=False)
     reference_sn        = models.CharField(db_column='Reference SN', max_length=45, blank=True, null=False)
-    ccc_r               = models.FloatField(db_column='CCC R', blank=True, null=False)
-    meassets            = models.IntegerField(db_column='MeasSets', blank=True, null=False)
-    pressure            = models.FloatField(db_column='Pressure', blank=True, null=False)
-    meas_temp           = models.FloatField(db_column='Meas Temp', blank=True, null=False)
-    meas_temp_2         = models.FloatField(db_column='Meas Temp 2', blank=True, null=False)
-    dvm_nplc            = models.FloatField(db_column='DVM NPLC', blank=True, null=False)
-    dvm_readings        = models.IntegerField(db_column='DVM readings', blank=True, null=False)
+    ccc_r               = models.CharField(db_column='CCC R', max_length=20, blank=True, null=False)
+    meassets            = models.CharField(db_column='MeasSets', max_length=20, blank=True, null=False)
+    pressure            = models.CharField(db_column='Pressure', max_length=20, blank=True, null=False)
+    meas_temp           = models.CharField(db_column='Meas Temp', max_length=10, blank=True, null=False)
+    meas_temp_2         = models.CharField(db_column='Meas Temp 2', max_length=10, blank=True, null=False)
+    dvm_nplc            = models.CharField(db_column='DVM NPLC', max_length=20, blank=True, null=False)
+    dvm_readings        = models.CharField(db_column='DVM readings', max_length=20,  blank=True, null=False)
     ccc_timing          = models.CharField(db_column='CCC Timing', max_length=45, blank=True, null=False)
-    service_id          = models.CharField(db_column='Service ID', blank=True, max_length=20)
+    service_id          = models.CharField(db_column='Service ID', blank=True, max_length=20, null=False)
     process             = models.CharField(db_column='Process', max_length=100, blank=True, null=False)
     area                = models.CharField(db_column='Area', max_length=20, blank=True, null=False)
 
@@ -161,25 +162,32 @@ class Scaling_CCC_Process(models.Model):
 
     def __str__(self):
         return self.process
+"""
+    @property
+    def sd_c_field(self):
+        if self.sd_c_field != "":
+            return self.sd_c_field
+        return None
+"""
 										
 class HR3100_Process(models.Model):
-    nominal         = models.FloatField(db_column='Nominal', blank=True, null=False)
-    system_id       = models.CharField(db_column='System ID', max_length=10, blank=True, null=False)
+    nominal         = models.FloatField(db_column='Nominal (ohm)', blank=True, null=True)
+    system_id       = models.CharField(db_column='System ID', max_length=20, blank=True, null=False)
     data_filename   = models.TextField(db_column='DataFilename', blank=True, null=False)
-    ccc_components  = models.TextField(db_column='CCC Components', blank=True, null=False)
-    date            = models.CharField(db_column='Date', blank=True, max_length=100)
+    ccc_components  = models.TextField(db_column='CCC Components', blank=True, null=True)
+    date            = models.DateTimeField(db_column='Date', blank=True, null=False)
     meas_voltage    = models.FloatField(db_column='MeasVoltage', blank=True, null=False)
     meas_delay      = models.FloatField(db_column='Meas Delay', blank=True, null=False)
-    ccc_nom_ratio   = models.CharField(db_column='CCC Nom Ratio', max_length=10, blank=True, null=False)
+    ccc_nom_ratio   = models.CharField(db_column='CCC Nom Ratio', max_length=20, blank=True, null=False)
     serial          = models.CharField(db_column='Serial', max_length=20, blank=True, null=False)
     ccc_deltaT      = models.FloatField(db_column='CCC deltaT', blank=True, null=False)
     ccc_deltaR      = models.FloatField(db_column='CCC deltaR', blank=True, null=False)
     c               = models.FloatField(db_column='C Average', blank=True, null=False)
-    sd_c_field      = models.FloatField(db_column='SD (C)', blank=True, null=False)
-    pred_c_field    = models.FloatField(db_column='Pred (C)', blank=True, null=False)
+    sd_c_field      = models.CharField(db_column='SD (C)', max_length=20, blank=True, null=True)
+    pred_c_field    = models.CharField(db_column='Pred (C)', max_length=20, blank=True, null=True)
     reference_sn    = models.CharField(db_column='Reference SN', max_length=45, blank=True, null=False)
-    meassets        = models.IntegerField(db_column='MeasSets', blank=True, null=False)
-    ccc_r           = models.FloatField(db_column='CCC R', blank=True, null=False)
+    meassets        = models.FloatField(db_column='MeasSets', blank=True, null=False)
+    ccc_r           = models.CharField(db_column='CCC R', max_length=20, blank=True, null=True)
     ccc_r_w1        = models.FloatField(db_column='CCC R w1', blank=True, null=False)
     ccc_r_w2        = models.FloatField(db_column='CCC R w2', blank=True, null=False)
     meas_temp       = models.FloatField(db_column='Meas Temp', blank=True, null=False)
@@ -188,11 +196,11 @@ class HR3100_Process(models.Model):
     sd_c1           = models.FloatField(db_column='SD C1', blank=True, null=False)
     c2              = models.FloatField(db_column='C2', blank=True, null=False)
     sd_c2           = models.FloatField(db_column='SD C2', blank=True, null=False)
-    dvm_nplc        = models.FloatField(db_column='DVM NPLC', blank=True, null=False)
-    dvm_readings    = models.IntegerField(db_column='DVM readings', blank=True, null=False)
-    ccc_timing      = models.CharField(db_column='CCC Timing', max_length=50, blank=True, null=False)
-    ccc_i_fb1       = models.FloatField(db_column='CCC I FB1', blank=True, null=False)
-    ccc_i_fb2       = models.FloatField(db_column='CCC I FB2', blank=True, null=False)
+    dvm_nplc        = models.CharField(db_column='DVM NPLC', max_length=10, blank=True, null=True)
+    dvm_readings    = models.CharField(db_column='DVM readings', max_length=10, blank=True, null=True)
+    ccc_timing      = models.CharField(db_column='CCC Timing', max_length=50, blank=True, null=True)
+    ccc_i_fb1       = models.CharField(db_column='CCC I FB1', max_length=20, blank=True, null=True)
+    ccc_i_fb2       = models.CharField(db_column='CCC I FB2', max_length=20, blank=True, null=True)
     service_id      = models.CharField(db_column='Service ID', blank=True, max_length=20)
     process         = models.CharField(db_column='Process', max_length=100, blank=True, null=False)
     area            = models.CharField(db_column='Area', max_length=20, blank=True, null=False)
@@ -204,10 +212,10 @@ class HR3100_Process(models.Model):
         return self.process
 
 class Warshawsky_Process(models.Model):
-    nominal = models.FloatField(db_column='Nominal', blank=True, null=False)
+    nominal = models.FloatField(db_column='Nominal (ohm)', blank=True, null=False)
     comments = models.CharField(db_column='Comments', max_length=200, blank=True, null=False)
-    date = models.CharField(db_column='Date', blank=True, max_length=100)
-    meas_voltage = models.FloatField(db_column='Meas Voltage', blank=True, null=False)
+    date = models.DateTimeField(db_column='Date', blank=True, null=False)
+    meas_voltage = models.CharField(db_column='Meas Voltage', max_length=10, blank=True, null=False)
     dummy = models.FloatField(db_column='Dummy', blank=True, null=False)
     meas_position = models.FloatField(db_column='Meas Position', blank=True, null=False)
     serial = models.CharField(db_column='Serial', max_length=20, blank=True, null=False)
@@ -234,9 +242,9 @@ class Warshawsky_Process(models.Model):
         return self.process
 
 class NIST_AAB_Process(models.Model):
-    nominal = models.FloatField(db_column='Nominal', blank=True, null=False)
-    date = models.CharField(db_column='Date', blank=True, max_length=100)
-    date_decimal = models.FloatField(db_column='Date Decimal', blank=True, null=False)
+    nominal = models.FloatField(db_column='Nominal (ohm)', blank=True, null=False)
+    date = models.DateTimeField(db_column='Date', blank=True, null=False)
+    date_decimal = models.FloatField(db_column='Date Decimal', blank=True, null=False, default=0)
     meas_voltage = models.FloatField(db_column='Meas Voltage', blank=True, null=False)
     meas_delay = models.FloatField(db_column='Meas Delay', blank=True, null=False)
     meas_position = models.FloatField(db_column='Meas Position', blank=True, null=False)
@@ -244,7 +252,7 @@ class NIST_AAB_Process(models.Model):
     meas_function = models.CharField(db_column='Meas Function', max_length=5, blank=True, null=False)
     ratio = models.FloatField(db_column='Ratio', blank=True, null=False)
     c = models.FloatField(db_column='C', blank=True, null=False)
-    pred_c_field = models.FloatField(db_column='Pred (C)', blank=True, null=False)
+    pred_c_field = models.CharField(db_column='Pred (C)', max_length = 20, blank=True, null=False)
     reference_sn = models.CharField(db_column='Reference SN', max_length=45, blank=True, null=False)
     dummy = models.CharField(db_column='Dummy', max_length=100, blank=True, null=False)
     aab_method = models.CharField(db_column='AAB Method', max_length=100, blank=True, null=False)
@@ -252,18 +260,18 @@ class NIST_AAB_Process(models.Model):
     meas_temp = models.FloatField(db_column='Meas Temp', blank=True, null=False)
     rh = models.FloatField(db_column='RH', blank=True, null=False)
     thermistor_r = models.FloatField(db_column='Thermistor R', blank=True, null=False)
-    left_temp = models.FloatField(db_column='Left Temp', blank=True, null=False)
-    right_temp = models.FloatField(db_column='Right Temp', blank=True, null=False)
-    room_temp = models.FloatField(db_column='Room Temp', blank=True, null=False)
-    left_rh = models.FloatField(db_column='Left RH', blank=True, null=False)
-    right_rh = models.FloatField(db_column='Right RH', blank=True, null=False)
-    room_rh = models.FloatField(db_column='Room RH', blank=True, null=False)
+    left_temp = models.CharField(db_column='Left Temp', max_length=10, blank=True, null=False)
+    right_temp = models.CharField(db_column='Right Temp', max_length= 10, blank=True, null=False)
+    room_temp = models.CharField(db_column='Room Temp', max_length=10, blank=True, null=True)
+    left_rh = models.CharField(db_column='Left RH', max_length=10, blank=True, null=False)
+    right_rh = models.CharField(db_column='Right RH', max_length= 10, blank=True, null=False)
+    room_rh = models.CharField(db_column='Room RH', max_length=10, blank=True, null=False)
     system_id = models.CharField(db_column='System ID', max_length=5, blank=True, null=False)
     data_filename = models.CharField(db_column='Data Filename', max_length=100, blank=True, null=False)
     aab_calibrator_1 = models.CharField(db_column='AAB Calibrator 1', max_length=20, blank=True, null=False) 
     aab_calibrator_2 = models.CharField(db_column='AAB Calibrator 2', max_length=20, blank=True, null=False) 
     aab_detector = models.CharField(db_column='AAB Detector', max_length=20, blank=True, null=False) 
-    aab_scanner = models.CharField(db_column='AAB Scanner', max_length=20, blank=True)
+    aab_scanner = models.CharField(db_column='AAB Scanner', max_length=50, blank=True)
     service_id = models.CharField(db_column='Service ID', blank=True, max_length=20)
     process = models.CharField(db_column='Process', max_length=100, blank=True, null=False)
     area = models.CharField(db_column='Area', max_length=20, blank=True, null=False)
@@ -272,21 +280,21 @@ class NIST_AAB_Process(models.Model):
         return self.process
 
 class MI_6010C_Process(models.Model):
-    nominal = models.FloatField(db_column='Nominal', blank=True, null=False)
-    date = models.CharField(db_column='Date', blank=True, max_length=100)
-    end_time = models.CharField(db_column='End Time', max_length=100, blank=True, null=False)
+    nominal = models.FloatField(db_column='Nominal (ohm)', blank=True, null=False)
+    date = models.DateTimeField(db_column='Date', blank=True, null=False)
+    end_time = models.TimeField(db_column='End Time', blank=True, null=False)
     meas_current = models.FloatField(db_column='Meas Current', blank=True, null=False)
     meas_delay = models.FloatField(db_column='Meas Delay', blank=True, null=False)
     meas_temp = models.FloatField(db_column='Meas Temp', blank=True, null=False)
     reference_sn = models.CharField(db_column='Reference SN', max_length=45, blank=True, null=False)
-    serial = models.CharField(db_column='Serial', max_length=20, blank=True, null=False)
+    serial = models.CharField(db_column='Serial', max_length=50, blank=True, null=False)
     ratio = models.FloatField(db_column='Ratio', blank=True, null=False)
     sd_c_field = models.FloatField(db_column='SD (C)', blank=True, null=False)
-    mi_stats = models.CharField(db_column='MI Stats', max_length=20, blank=True, null=False)
+    mi_stats = models.CharField(db_column='MI Stats', max_length=50, blank=True, null=False)
     r = models.FloatField(db_column=' R', blank=True, null=False)
     system_id = models.CharField(db_column='System ID', max_length=10, blank=True, null=False)
     comments = models.TextField(db_column='Comments', blank=True, null=False)
-    mi_range = models.CharField(db_column='MI Range', max_length=50, blank=True, null=False)
+    mi_range = models.CharField(db_column='MI Range', max_length=100, blank=True, null=False)
     mi_channels = models.TextField(db_column='MI Channels', blank=True, null=False)
     mi_components = models.TextField(db_column='MI Components', blank=True, null=False)
     service_id = models.CharField(db_column='Service ID', blank=True, max_length=20)
@@ -297,9 +305,9 @@ class MI_6010C_Process(models.Model):
         return self.process
 
 class MI_6010B_Process(models.Model):
-    nominal = models.FloatField(db_column='Nominal', blank=True, null=False)
-    date = models.CharField(db_column='Date', blank=True, max_length=100)
-    end_time = models.CharField(db_column='End Time', max_length=100, blank=True, null=False)
+    nominal = models.FloatField(db_column='Nominal (ohm)', blank=True, null=False)
+    date = models.DateTimeField(db_column='Date', blank=True, null=False)
+    end_time = models.TimeField(db_column='End Time', blank=True, null=False)
     meas_current = models.FloatField(db_column='Meas Current', blank=True, null=False)
     meas_delay = models.FloatField(db_column='Meas Delay', blank=True, null=False)
     meas_temp = models.FloatField(db_column='Meas Temp', blank=True, null=False)
@@ -311,7 +319,7 @@ class MI_6010B_Process(models.Model):
     r = models.FloatField(db_column=' R', blank=True, null=False)
     system_id = models.CharField(db_column='System ID', max_length=10, blank=True, null=False)
     comments = models.TextField(db_column='Comments', blank=True, null=False)
-    mi_range = models.CharField(db_column='MI Range', max_length=50, blank=True, null=False)
+    mi_range = models.CharField(db_column='MI Range', max_length=100, blank=True, null=False)
     mi_channels = models.TextField(db_column='MI Channels', blank=True, null=False)
     mi_components = models.TextField(db_column='MI Components', blank=True, null=False)
     service_id = models.CharField(db_column='Service ID', blank=True, max_length=20)
@@ -322,9 +330,9 @@ class MI_6010B_Process(models.Model):
         return self.process
 
 class MI_6020Q_Process(models.Model):
-    nominal = models.FloatField(db_column='Nominal', blank=True, null=False)
-    date = models.CharField(db_column='Date', blank=True, max_length=100)
-    end_time = models.CharField(db_column='End Time', max_length=100, blank=True, null=False)
+    nominal = models.FloatField(db_column='Nominal (ohm)', blank=True, null=False)
+    date = models.DateTimeField(db_column='Date', blank=True, null=False)
+    end_time = models.TimeField(db_column='End Time', blank=True, null=False)
     meas_current = models.FloatField(db_column='Meas Current', blank=True, null=False)
     meas_delay = models.FloatField(db_column='Meas Delay', blank=True, null=False)
     meas_temp = models.FloatField(db_column='Meas Temp', blank=True, null=False)
@@ -336,7 +344,7 @@ class MI_6020Q_Process(models.Model):
     r = models.FloatField(db_column=' R', blank=True, null=False)
     system_id = models.CharField(db_column='System ID', max_length=10, blank=True, null=False)
     comments = models.TextField(db_column='Comments', blank=True, null=False)
-    mi_range = models.CharField(db_column='MI Range', max_length=50, blank=True, null=False)
+    mi_range = models.CharField(db_column='MI Range', max_length=100, blank=True, null=False)
     mi_channels = models.TextField(db_column='MI Channels', blank=True, null=False)
     mi_components = models.TextField(db_column='MI Components', blank=True, null=False)
     service_id = models.CharField(db_column='Service ID', blank=True, max_length=20)
@@ -350,9 +358,9 @@ class MI_6020Q_Process(models.Model):
         return self.process
 
 class MI_6010Q_Process(models.Model):
-    nominal = models.FloatField(db_column='Nominal', blank=True, null=False)
-    date = models.CharField(db_column='Date', blank=True, max_length=100)
-    end_time = models.CharField(db_column='End Time', max_length=100, blank=True, null=False)
+    nominal = models.FloatField(db_column='Nominal (ohm)', blank=True, null=False)
+    date = models.DateTimeField(db_column='Date', blank=True, null=False)
+    end_time = models.TimeField(db_column='End Time', blank=True, null=False)
     meas_current = models.FloatField(db_column='Meas Current', blank=True, null=False)
     meas_delay = models.FloatField(db_column='Meas Delay', blank=True, null=False)
     meas_temp = models.FloatField(db_column='Meas Temp', blank=True, null=False)
@@ -364,7 +372,7 @@ class MI_6010Q_Process(models.Model):
     r = models.FloatField(db_column=' R', blank=True, null=False)
     system_id = models.CharField(db_column='System ID', max_length=10, blank=True, null=False)
     comments = models.TextField(db_column='Comments', blank=True, null=False)
-    mi_range = models.CharField(db_column='MI Range', max_length=50, blank=True, null=False)
+    mi_range = models.CharField(db_column='MI Range', max_length=100, blank=True, null=False)
     mi_channels = models.TextField(db_column='MI Channels', blank=True, null=False)
     mi_components = models.TextField(db_column='MI Components', blank=True, null=False)
     service_id = models.CharField(db_column='Service ID', blank=True, max_length=20)
@@ -378,9 +386,9 @@ class MI_6010Q_Process(models.Model):
         return self.process
     
 class MI_6010SW_Process(models.Model):
-    nominal = models.FloatField(db_column='Nominal', blank=True, null=False)
-    date = models.CharField(db_column='Date', blank=True, max_length=100)
-    end_time = models.CharField(db_column='End Time', max_length=100, blank=True, null=False)
+    nominal = models.FloatField(db_column='Nominal (ohm)', blank=True, null=False)
+    date = models.DateTimeField(db_column='Date', blank=True, null=False)
+    end_time = models.TimeField(db_column='End Time', blank=True, null=False)
     meas_current = models.FloatField(db_column='Meas Current', blank=True, null=False)
     meas_delay = models.FloatField(db_column='Meas Delay', blank=True, null=False)
     meas_temp = models.FloatField(db_column='Meas Temp', blank=True, null=False)
@@ -392,7 +400,7 @@ class MI_6010SW_Process(models.Model):
     r = models.FloatField(db_column=' R', blank=True, null=False)
     system_id = models.CharField(db_column='System ID', max_length=10, blank=True, null=False)
     comments = models.TextField(db_column='Comments', blank=True, null=False)
-    mi_range = models.CharField(db_column='MI Range', max_length=50, blank=True, null=False)
+    mi_range = models.CharField(db_column='MI Range', max_length=100, blank=True, null=False)
     mi_channels = models.TextField(db_column='MI Channels', blank=True, null=False)
     mi_components = models.TextField(db_column='MI Components', blank=True, null=False)
     service_id = models.CharField(db_column='Service ID', blank=True, max_length=20)
@@ -406,9 +414,9 @@ class MI_6010SW_Process(models.Model):
         return self.process
 
 class MI_6000B_Process(models.Model):
-    nominal = models.FloatField(db_column='Nominal', blank=True, null=False)
-    date = models.CharField(db_column='Date', blank=True, max_length=100)
-    end_time = models.CharField(db_column='End Time', max_length=100, blank=True, null=False)
+    nominal = models.FloatField(db_column='Nominal (ohm)', blank=True, null=False)
+    date = models.DateTimeField(db_column='Date', blank=True, null=False)
+    end_time = models.TimeField(db_column='End Time', blank=True, null=False)
     meas_voltage = models.FloatField(db_column='Meas Voltage', blank=True, null=False)
     meas_delay = models.FloatField(db_column='Meas Delay', blank=True, null=False)
     meas_temp = models.FloatField(db_column='Meas Temp', blank=True, null=False)
@@ -420,10 +428,10 @@ class MI_6000B_Process(models.Model):
     r = models.FloatField(db_column=' R', blank=True, null=False)
     system_id = models.CharField(db_column='System ID', max_length=10, blank=True, null=False)
     comments = models.TextField(db_column='Comments', blank=True, null=False)
-    dvm_nplc = models.IntegerField(db_column='DVM NPLC', blank=True, null=False)
-    dvm_readings = models.IntegerField(db_column='DVM Readings', blank=True, null=False)
-    source_voltage = models.FloatField(db_column='Source Voltage', blank=True, null=False)
-    mi_range = models.CharField(db_column='MI Range', max_length=50, blank=True, null=False)
+    dvm_nplc = models.CharField(db_column='DVM NPLC', max_length=10, blank=True, null=False)
+    dvm_readings = models.CharField(db_column='DVM Readings', max_length=10, blank=True, null=False)
+    source_voltage = models.CharField(db_column='Source Voltage',max_length=10, blank=True, null=False)
+    mi_range = models.CharField(db_column='MI Range', max_length=100, blank=True, null=False)
     mi_channels = models.TextField(db_column='MI Channels', blank=True, null=False)
     mi_components = models.TextField(db_column='MI Components', blank=True, null=False)
     service_id = models.CharField(db_column='Service ID', blank=True, max_length=20)

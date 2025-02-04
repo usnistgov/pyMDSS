@@ -30,8 +30,12 @@ class search_standard_resistor_form(forms.ModelForm):
         self.fields['serial'].widget.attrs['class'] = 'form-control'
         self.fields['serial'].label = 'Serial'
         self.fields['serial'].widget.attrs['size'] = 20
-        self.fields['model_no'].widget.attrs['class'] = 'form-control'
-        self.fields['std_manufacturer'].widget.attrs['class'] = 'form-control'
+    
+        self.fields['nominal'].widget.attrs['class'] = 'form-control'
+        #self.fields['nominal'].label = 'Nominal'
+        #self.fields['nominal'].widget.attrs['size'] = 20
+    
+        #self.fields['std_manufacturer'].widget.attrs['class'] = 'form-control'
         self.fields['service_id'].widget.attrs['class'] = 'form-control'
         self.fields['process_name'].widget.attrs['class'] = 'form-control'
         self.fields['format'].widget.attrs['class'] = 'form-control'

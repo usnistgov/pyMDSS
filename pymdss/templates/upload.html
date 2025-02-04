@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block title %} Upload test points {% endblock %}
 
 {% block content %}
@@ -8,19 +9,30 @@
 <h6>Upload Test points</h6> <input type="file" name="mdss_data_file[]" multiple>
 <button class="btn btn-secondary" type="submit">Upload File</button>
 <br><br>
-<div class="progress" style="width: 25%; height: 5%;">
-    <div class="progress-bar progress-bar-striped active" role="progressbar"
-    aria-valuenow="90" aria-valuemin="0" aria-valuemax="100" style="width:80%">
-      40%
-    </div>
+<div class='progress-wrapper dropdown' style="padding-top: 10px; padding-right: 800px;">
+  <div id='progress-bar' class='progress-bar' style="height: 30px; width: 80px; border-radius: 50px; padding-right: 0px; padding-left: 0px; background-color: #68a9ef;">&nbsp;</div>
+  <div class='dropdown' style="padding-right: 100px" id="progress-bar-message">Progress:&nbsp;
+    <script src="{% static 'celery_progress/celery_progress.js' %}"></script>
   </div>
+</div>
+
+{% if task_id %}
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    var progressUrl = "{% url 'celery_progress:task_status' task_id %}";
+    CeleryProgressBar.initProgressBar(progressUrl);
+  });
+</script>
+{% endif %}
+
 <br><br>
-<h6>Uploaded Files:</h6>
-{% for fn in fdata %}
+<!--h6>Uploaded Files:</h6-->
+<!--{% for fn in fdata %}
     {% for f in fn %}
         <em>{{f}}&nbsp;</em>
     {% endfor %}
     <br>
 {% endfor %}
+</div-->
 </form>
 {% endblock %}

@@ -49,11 +49,23 @@ GRANT ALL PRIVILEGES ON *.* TO 'mdss_user'@'localhost' WITH GRANT OPTION;
 `python manage.py loaddata $appname$ --indent=4 > filename.json$`
 
 ### remove db from app
+To remove all databases along with the data from your schema and then re-migrate the 
+databases do the following:
 `python manage.py flush $appname$`
-or if you have django-extensions
+or if you have django-extensions:
 `python manage.py reset_db`
 * Remove/delete the migrations folder
 `python manage.py makemigrations $appname$`
 `python manage.py migrate`
 
+### install redis for windows (This is used as a message broker between celery and django)
+Follow the guide here:
+https://medium.com/@mayank_goyal/how-to-install-redis-and-as-a-windows-service-f0ab2559a3b
+This will install redis as a system service on windows.
 
+https://www.youtube.com/watch?v=CkR_gjlDH-4
+This shows how to integrate redis with django
+
+To run celery (we offload intesive tasks to celery workers to do async processing):
+`celery -A pymdss worker -P threads -E -l info` or
+`celery -A pymdss worker -P threads -E -l debug` (to start in debug mode)

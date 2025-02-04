@@ -1,7 +1,8 @@
 {% extends 'base.html' %}
 {% block title %} Select Calibration Area {% endblock %}
 {% block content %}
-  <div class="dropdown col-md-12 offset-md-1">
+<body>
+  <div class="dropdown col-md-4 offset-md-1">
   </br>
     <h4>Select a calibration area: </h4>
     <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -9,8 +10,9 @@
     </button>
     <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
       <a class="dropdown-item" href="{% url 'calibrationArea' %}">standard resistors</a>
-      <a class="dropdown-item" href="calibrationAreaCap">standard capacitors</a>
-      <a class="dropdown-item" href="calibrationAreaQuant">quantum conductance</a>
+      <a class="dropdown-item" href="{% url 'capacitor_calibrationArea' %}">standard capacitors</a>
+      <!--a class="dropdown-item" href="{% url 'calibrationArea' %}">quantum conductance</a-->
     </div>
   </div>
+</body>
 {% endblock %}
