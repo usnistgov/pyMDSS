@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %} Quantum Conductance Calibration Area {% endblock %}
+{% block content %}  
+</br></br>
+<form class="col-md-12 offset-md-1" enctype="multipart/form-data" action= "{% url 'search' %}" method="post">
+    {% csrf_token %}
+    <h4>Quantum Conductance Search Feature</h4>
+    <input type="submit" value="Search" class="btn btn-secondary btn-lg"/>
+</form>
+</br>
+<form class="col-md-12 offset-md-1" enctype="multipart/form-data" action= "{% url 'upload' %}" method="post">
+    {% csrf_token %}
+    <h4>Upload test points</h4>
+    <input type="submit" value="Upload" class="btn btn-secondary btn-lg"/>
+</form>
+{% endblock %}

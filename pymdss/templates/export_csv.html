@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block title %} Export {% endblock %}
+{% block content %}
+<form enctype="multipart/form-data" method="post", action="{% url 'search' %}">
+    {% csrf_token %}
+    <p>Processing request...</p>
+    </div>
+</form>
+{% endblock %}
