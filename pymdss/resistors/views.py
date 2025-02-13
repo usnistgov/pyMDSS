@@ -36,7 +36,7 @@ celery_app = Celery('pymdss', backend="django-db")
 global nrows
 # Create your views here.
 def process(request):
-        sleep(2)
+        sleep(3)
         nrows = request.session.get('nrows', '0')
         return render(request, 'process.html', {'nrows': nrows})
     

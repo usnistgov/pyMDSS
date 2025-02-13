@@ -22,6 +22,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('resistors.urls')),
     path('', include('capacitors.urls')),
+    path('', include('qconductance.urls')),
     path('celery-progress/', include('celery_progress.urls')),  # add this line (the endpoint is configurable)
 ]
 

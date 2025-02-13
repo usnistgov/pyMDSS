@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     #'import_export',
     'resistors',
     'capacitors',
+    'qconductance',
     'django_extensions',
     'celery_progress', # celery progress bar
     'django_celery_results', # celery results in django
