@@ -1,0 +1,46 @@
+services:
+  db:
+    container_name: 'mysql-db'
+    image: mysql:9.2
+    expose:
+     - 3306
+    ports:
+      - '3306:3306'
+    env_file:
+      - /.env
+    environment:
+       MYSQL_DATABASE: ${MYSQL_DATABASE}
+       MYSQL_USER: ${MYSQL_USER}
+       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+       MYSQL_HOST: ${MYSQL_HOST}
+       MYSQL_PORT: ${MYSQL_PORT}
+    volumes:
+      - 'db:/var/lib/mysql'
+    command: ['mysqld', '--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci']
+  redis:
+    container_name: 'redis'
+    image: 'redis:7.4'
+    ports:
+      - '6378:6379'
+    volumes:
+      - 'redisdata:/data'
+  web:
+    build: .
+    command: python3 pymdss/manage.py runserver 0.0.0.0:8000
+    volumes:
+      - '.:/pymdss'
+    ports:
+      - "8000:8000" # host port:container port
+    depends_on:
+      - db
+      - redis
+    links:
+      - db
+    env_file:
+      - /.env
+
+volumes:
+  redisdata:
+  db:
+  .:
