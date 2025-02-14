@@ -9,7 +9,14 @@ pip install django
 pip install django-import-export
 pip install mysqlclient
 pip install django-extensions
-pip install django-crispy-forms`
+pip install django-crispy-forms
+pip install celery-progress
+pip install django-celery_results
+pip install django-celery
+pip install xslxwriter
+pip install mysql
+pip install mysql-connector-python
+pip install openpyxl`
 
 ### To start new project:
 `django-admin startproject $projectname$`
@@ -62,6 +69,8 @@ or if you have django-extensions:
 Follow the guide here:
 https://medium.com/@mayank_goyal/how-to-install-redis-and-as-a-windows-service-f0ab2559a3b
 This will install redis as a system service on windows.
+To add Redis as a Windows Service :
+`redis-server --service-install`
 
 https://www.youtube.com/watch?v=CkR_gjlDH-4
 This shows how to integrate redis with django
@@ -69,3 +78,9 @@ This shows how to integrate redis with django
 To run celery (we offload intesive tasks to celery workers to do async processing):
 `celery -A pymdss worker -P threads -E -l info` or
 `celery -A pymdss worker -P threads -E -l debug` (to start in debug mode)
+
+Docker:
+To access containers:
+`docker exec -it [container] bash`
+Shows all containers:
+`docker ps -a`
