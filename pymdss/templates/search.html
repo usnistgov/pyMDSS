@@ -1,18 +1,19 @@
 {% extends 'base.html'%}
 {% block title%} Search Standard resistors {% endblock %}
 {% block content %}
-<form class="col-md-12 offset-md-1" style="width: 30%;" method="post" action="{% url 'search' %}" >
+<form class="col-md-12 offset-md-1" style="width: 30%;" method="post" onsubmit="openProcessTab()" action="{% url 'search' %}" >
     {% csrf_token %}
     <br>
     {{ form.as_p }}
-    <button type="submit" action="." onclick="window.open(new_site, '_blank')" value="download" name="download">Download</button> 
+    <button type="submit" action="." value="download" name="download">Download</button> 
 </form>
 <script>
-let myhost = window.location.origin;
-let new_site = myhost.concat('/process')
-window.open(
-   new_site,
-  '_blank' // <- This is what makes it open in a new window.
-);
+function openProcessTab() {
+    setTimeout(() => {
+        const newSite = window.location.origin + '/process/';
+        window.open(newSite, '_blank');
+    }, 100);
+}
 </script>
 {% endblock %}
+

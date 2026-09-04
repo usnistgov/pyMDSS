@@ -14,8 +14,21 @@
 {% block title%} {% endblock %}
 {% block content %}
 <form class="col-md-12 offset-md-1" style="width: 30%;" method="get" action="{% url 'process' %}" >
-    {% csrf_token %}
     <br><br>
-    <h4><em>Processed {{nrows}} elements...</em></h4>
+    <h4>
+  <em>Processed <span id="nrows">{{ nrows }}</span> elements...</em>
+    </h4>
 </form>
+<script>
+function pollNrows() {
+    fetch("{% url 'get_nrows' %}")
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById("nrows").innerText = data.nrows;
+        });
+}
+
+setInterval(pollNrows, 100); // every 1 second
+</script>
+
 {% endblock %}

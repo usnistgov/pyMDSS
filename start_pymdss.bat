@@ -1,3 +1,3 @@
-cd pymdss
-python manage.py runserver localhost:8000
+cd C:\Users\ohm\Desktop\pyMDSS\pymdss
+python manage.py runserver pymdss.campus.nist.gov:8000
 pause

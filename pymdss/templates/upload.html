@@ -9,9 +9,10 @@
 <h6>Upload Test points</h6> <input type="file" name="mdss_data_file[]" multiple>
 <button class="btn btn-secondary" type="submit">Upload File</button>
 <br><br>
+<h6>Progress: </h6>
 <div class='progress-wrapper dropdown' style="padding-top: 10px; padding-right: 800px;">
   <div id='progress-bar' class='progress-bar' style="height: 30px; width: 80px; border-radius: 50px; padding-right: 0px; padding-left: 0px; background-color: #68a9ef;">&nbsp;</div>
-  <div class='dropdown' style="padding-right: 100px" id="progress-bar-message">Progress:&nbsp;
+  <div class='dropdown' style="padding-right: 100px" id="progress-bar-message">&nbsp;
     <script src="{% static 'celery_progress/celery_progress.js' %}"></script>
   </div>
 </div>
@@ -19,7 +20,7 @@
 {% if task_id %}
 <script>
   document.addEventListener("DOMContentLoaded", function() {
-    var progressUrl = "{% url 'celery_progress:task_status' task_id %}";
+    var progressUrl = "{% url 'celery_progress:task_status' task_id|safe %}";
     CeleryProgressBar.initProgressBar(progressUrl);
   });
 </script>

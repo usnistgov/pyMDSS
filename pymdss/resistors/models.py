@@ -33,10 +33,10 @@ class search_standard_resistor(models.Model):
     Args:
         models ([type]): [description]
     """
-    serial              = models.CharField(db_column='Serial', max_length=20, null=False, blank=True, help_text='<em>Serial number of the standard</em>')
+    serial              = models.CharField(db_column='Serial', max_length=40, null=False, blank=True, help_text='<em>Serial number of the standard</em>')
     #model_no            = models.CharField(db_column='Model', max_length=20, null=False, blank=True, help_text='<em>Model number of the standard</em>')
     #std_manufacturer    = models.CharField(db_column='Standard Manufacturer', max_length=20, null=False, blank=True, help_text='<em>Manufacturer of the standard</em>')
-    nominal             = models.CharField(db_column='Nominal', max_length=20, null=True, blank=True, help_text='<em>Nominal standard value in ohms</em>')
+    nominal             = models.CharField(db_column='Nominal (ohm)', max_length=20, null=True, blank=True, help_text='<em>Nominal standard value in ohms</em>')
     service_id          = models.CharField(db_column='Service Id', max_length=20, null=False, blank=True, help_text='<em>NIST Service Identification</em>')
     process_name        = models.CharField(db_column='Process name', max_length=30, null=False, blank=True, help_text='<em>Name of the process</em>')
     format              = models.CharField(db_column='Format', max_length=10, null=False, blank=True, help_text='<em>Download file format (xlsx if left blank)</em>')
@@ -169,7 +169,7 @@ class Scaling_CCC_Process(models.Model):
             return self.sd_c_field
         return None
 """
-										
+							
 class HR3100_Process(models.Model):
     nominal         = models.FloatField(db_column='Nominal (ohm)', blank=True, null=True)
     system_id       = models.CharField(db_column='System ID', max_length=20, blank=True, null=False)
@@ -384,7 +384,7 @@ class MI_6010Q_Process(models.Model):
 
     def __str__(self):
         return self.process
-    
+
 class MI_6010SW_Process(models.Model):
     nominal = models.FloatField(db_column='Nominal (ohm)', blank=True, null=False)
     date = models.DateTimeField(db_column='Date', blank=True, null=False)

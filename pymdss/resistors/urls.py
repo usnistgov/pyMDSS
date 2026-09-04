@@ -13,4 +13,5 @@ urlpatterns = [
     path(r'upload/', views.upload, name='upload'),
     path(r'process/', views.process, name='process'),
     path('check_task_status/<task_id>/', views.get_task_status, name='check_task_status'),
+    path('get-nrows/', views.get_nrows, name='get_nrows'),
 ]

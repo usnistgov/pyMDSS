@@ -27,14 +27,19 @@ print ('BASE_DIR', BASE_DIR)
 SECRET_KEY = 'django-insecure-_b$$cn--cm5q@kzi6tc58ah#f)6ts0shnj7mkzc7i23p12$xy1'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
+ALLOWED_HOSTS = ["*",
+                 "pymdss.campus.nist.gov", 
+                 "pymdss.campus.nist.gov.local",
+                 "129.6.124.172", 
+                 "localhost",
+                 "127.0.0.1",]
+#SERVER_DOMAIN = "https://pymdss.campus.nist.gov"
 
-ALLOWED_HOSTS = [ gethostname(), gethostbyname(gethostname()),
-                 '127.0.0.1',
-                 '129.6.124.233',
-                 'pg902544.campus.nist.gov',
-                 'pn126904.campus.nist.gov',
-                ] 
+CSRF_TRUSTED_ORIGINS = [
+    "https://pymdss.campus.nist.gov",
+    "https://129.6.124.172"
+]
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -59,6 +64,7 @@ INSTALLED_APPS = [
     
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -84,6 +90,7 @@ TEMPLATES = [
         },
     },
 ]
+
 
 WSGI_APPLICATION = 'pymdss.wsgi.application'
 
@@ -119,6 +126,24 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'django_debug.log'),
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.0/topics/i18n/
@@ -131,16 +156,27 @@ USE_I18N = True
 
 USE_TZ = True
 
+if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SECURE_SSL_REDIRECT = True  # Only if you're not already redirecting at the Nginx/Proxy level
+else:
+    SECURE_PROXY_SSL_HEADER = None
+    SECURE_SSL_REDIRECT = False
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
-
 STATIC_URL = '/static/'
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 #STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 STATIC_ROOT = str(BASE_DIR.joinpath('staticfiles'))
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
+
+
+WHITENOISE_MANIFEST_STRICT = False
+WHITENOISE_MAX_AGE = 31536000
+SECURE_HSTS_SECONDS	= 31536000
 
 CELERY_BROKER_URL = 'redis://localhost:6379/0'
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
@@ -158,3 +194,5 @@ CELERY_RESULT_EXPIRES = 3600
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 DATA_UPLOAD_MAX_NUMBER_FILES = 5000
+
+#RUNSERVERPLUS_SERVER_ADDRESS_PORT = "0.0.0.0:8000"

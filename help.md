@@ -9,14 +9,7 @@ pip install django
 pip install django-import-export
 pip install mysqlclient
 pip install django-extensions
-pip install django-crispy-forms
-pip install celery-progress
-pip install django-celery_results
-pip install django-celery
-pip install xslxwriter
-pip install mysql
-pip install mysql-connector-python
-pip install openpyxl`
+pip install django-crispy-forms`
 
 ### To start new project:
 `django-admin startproject $projectname$`
@@ -37,6 +30,26 @@ GRANT ALL PRIVILEGES ON *.* TO 'mdss_user'@'localhost' WITH GRANT OPTION;
 `python manage.py makemigrations`
 `python manage.py migrate`
 `python manage.py runserver $server ip or localhost$`
+
+### To use https 
+`pip install pyopenssl`
+`pip install werkzeug`
+Then in settings.py
+`INSTALLED_APPS ['django-extensions',]`
+use mkcert to generate certificates and key file. On windows you can use the binaries on their github page
+`mkcert-v1.4.4-windows-amd64.exe -cert-file cert.pem -key-file key.pem pg902544.campus.nist.gov 129.6.124.172 localhost 127.0.0.1 PG902544.campus.nist.gov`
+Then run the django server
+`python manage.py runserver_plus --cert-file cert.pem --key-file key.pem $server ip or localhost$`
+
+### To run with DEBUG=False
+We need a server like nginx/apache to host the static files or use whitenoise
+`pip install whitenoise`
+Add whitenoise to middleware
+`MIDDLEWARE = [
+    "django.middleware.security.SecurityMiddleware","whitenoise.middleware.WhiteNoiseMiddleware",]`
+Enable compression and caching
+`STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"`
+`python manage.py collectstatic`
 
 ### Create superuser:
 `python manage.py createsuperuser`
@@ -69,8 +82,6 @@ or if you have django-extensions:
 Follow the guide here:
 https://medium.com/@mayank_goyal/how-to-install-redis-and-as-a-windows-service-f0ab2559a3b
 This will install redis as a system service on windows.
-To add Redis as a Windows Service :
-`redis-server --service-install`
 
 https://www.youtube.com/watch?v=CkR_gjlDH-4
 This shows how to integrate redis with django
@@ -78,9 +89,3 @@ This shows how to integrate redis with django
 To run celery (we offload intesive tasks to celery workers to do async processing):
 `celery -A pymdss worker -P threads -E -l info` or
 `celery -A pymdss worker -P threads -E -l debug` (to start in debug mode)
-
-Docker:
-To access containers:
-`docker exec -it [container] bash`
-Shows all containers:
-`docker ps -a`

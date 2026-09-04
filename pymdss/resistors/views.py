@@ -27,18 +27,22 @@ from celery_progress.backend import ProgressRecorder
 from django.core.serializers import serialize, deserialize
 from celery.result import AsyncResult
 from zoneinfo import ZoneInfo
-from time import sleep
+from django.core.cache import cache
 
 import logging
 logger = logging.getLogger(__name__)
 
 celery_app = Celery('pymdss', backend="django-db")
-global nrows
 # Create your views here.
+
+def get_nrows(request):
+    key = f"nrows_{request.session.session_key}"
+    nrows = cache.get(key, 0)
+    return JsonResponse({'nrows': nrows})
+
 def process(request):
-        sleep(3)
-        nrows = request.session.get('nrows', '0')
-        return render(request, 'process.html', {'nrows': nrows})
+    nrows = request.session.get('nrows', '0')
+    return render(request, 'process.html', {'nrows': nrows})
     
 def index(request):
     return render(request, 'index.html')
@@ -51,10 +55,10 @@ def home(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            messages.success(request, "You are logged in...")
+            messages.success(request, "You are logged in. Welcome to pyMDSS.")
             return redirect('selectCalibrationArea')
         else:
-            messages.success(request, "There was an error loggin in...")
+            messages.success(request, "Wrong username or password. Please try again.")
             return redirect('home')
     return render(request, 'home.html', {})
 
@@ -174,7 +178,7 @@ def handle_uploaded_file(self, encoded_file_data, encoded_file_name):
                                 i[2] = datetime.datetime.strptime(i[2], '%Y-%m-%d %H:%M:%S').replace(tzinfo=ZoneInfo("UTC"))
                                 pass
                             i[3] = datetime.datetime.strptime(i[3], '%H:%M:%S').replace(tzinfo=ZoneInfo("UTC"))
-                            print('Data', len(i), i)
+                            #print('Data', len(i), i)
                             myobj = MI_6010C_Process(*i)
                             myobj.id = None
                             myobj.save()
@@ -253,13 +257,13 @@ def handle_uploaded_file(self, encoded_file_data, encoded_file_name):
             already_processed_filenames.append(encoded_file_name[ct])       
         progress_recorder.set_progress(int(((ct+1)/len(encoded_file_data))*100), 100)
     for i in uploaded_filenames:
-        _msg = "Successfully uploaded Files: " +  str(i)
+        _msg = " \nSuccessfully uploaded file: " + str(i)
         msg.append(_msg)
     for i in error_filenames:
-        _msg = "Error Files that couldn't be uploaded: " +  str(i)
+        _msg = " \nError, cannot upload file: " + str(i)
         msg.append(_msg)
     for i in already_processed_filenames:
-        _msg = "Already processed Files: " + str(i)
+        _msg = " \nAlready processed file: " + str(i)
         msg.append(_msg)
     cursor.close()
     #sort_by_date()
@@ -283,18 +287,15 @@ def search(request):
             #print(serial, process_name, service_id)
             if serial != '' or nominal != None or process_name != '' or service_id != '':
                 mydict = {'Serial': serial,
-                          'Nominal': nominal,
-                          'Process': process_name,
+                          'Nominal (ohm)': nominal,
                           'Service ID': service_id,
+                          'Process': process_name,
                           'Format': format,
                          }
                 response = fetch_data(request, mydict)
                 return response
             else:
-                return redirect('.')
-                pass
-            # Assuming you want to redirect or do something after successful form submission
-            # Replace 'redirect_url' with the actual URL you want to redirect to.     
+                search_data_form = search_standard_resistor_form()
     else:
         # Handle GET request, just render the empty form
         search_data_form = search_standard_resistor_form()
@@ -306,7 +307,6 @@ def sort_by_date():
     db_conn = connections['default']
     cursor = db_conn.cursor()
     for table in resistors_tables:
-        #print(table)
         if table == 'resistors_magnicon_ccc_process':
             query = """SELECT * FROM `{}` ORDER BY STR_TO_DATE(Date, '%m/%d/%Y %h:%i:%S %p') ASC""".format(table)
             try:
@@ -341,6 +341,8 @@ def fetch_data(request, mydict):
     table_names = []
     mycol = []
     nrows = 0
+    cache.set(f"nrows_{request.session.session_key}", nrows, timeout=3600)
+    #print(search_params)
     for table in tables:
         if  table.startswith('resistors') and \
             table != ('resistors_search_standard_resistor') and \
@@ -362,17 +364,18 @@ def fetch_data(request, mydict):
             for column in columns:
                 for key in keys:
                     if mydict[key]:
+                        #print(column, key)
                         if column == key:
                             mycol.append(column)
             #print ('Column: ', mycol)
             if len(param) == 1:
-                conditions.append("BINARY {}=%s".format(mycol[0]))
+                conditions.append("BINARY `{}`=%s".format(mycol[0]))
             elif len(param) == 2:
-                conditions.append("{} LIKE %s".format(mycol[0]) + " AND " + "{} LIKE %s".format(mycol[1]))
+                conditions.append("`{}` LIKE %s".format(mycol[0]) + " AND " + "`{}` LIKE %s".format(mycol[1]))
             elif len(param) == 3:
-                conditions.append("{} LIKE %s".format(mycol[0]) + " AND " + "{} LIKE %s".format(mycol[1]) + " AND " + "{} LIKE %s".format(mycol[2]))
+                conditions.append("`{}` LIKE %s".format(mycol[0]) + " AND " + "`{}` LIKE %s".format(mycol[1]) + " AND " + "`{}` LIKE %s".format(mycol[2]))
             elif len(param) == 4:
-                conditions.append("{} LIKE %s".format(mycol[0]) + " AND " + "{} LIKE %s".format(mycol[1]) + " AND " + "{} LIKE %s".format(mycol[2]) + " AND " + "{} LIKE %s".format(mycol[3]))
+                conditions.append("`{}` LIKE %s".format(mycol[0]) + " AND " + "`{}` LIKE %s".format(mycol[1]) + " AND " + "`{}` LIKE %s".format(mycol[2]) + " AND " + "`{}` LIKE %s".format(mycol[3]))
             query += " OR ".join(conditions)
             param_final =  tuple(param_final)
             #param = (f"%{keyword_1}%", f"%{keyword_2}%", )*len(columns)
@@ -382,14 +385,14 @@ def fetch_data(request, mydict):
             cursor.execute(query, param_final)
             table_results = cursor.fetchall()
             nrows += len(table_results)
+            cache.set(f"nrows_{request.session.session_key}", nrows, timeout=3600)
             #print (table_results)
             if table_results != ():
                 results.append(table_results)
                 table_names.append(table)
                 header.append([row[0] for row in cursor.description])
     cursor.close()
-    print("rows: ", nrows)
-    request.session['nrows'] = str(nrows)
+    #print("rows: ", nrows)
     #export_xlsxwriter(header, results, mydict, table_names)
     if search_params[-1] == 'xlsx':
         response = export_openpyxl(header, results, mydict, table_names)
@@ -397,6 +400,8 @@ def fetch_data(request, mydict):
         response = export_text(header, results, mydict, table_names)
     else:
         response = export_openpyxl(header, results, mydict, table_names)
+    request.session['nrows'] = str(nrows)
+    request.session.modified = True
     return response
     # Fetch results
     #results = cursor.fetchall()
@@ -573,4 +578,3 @@ def documentation(request):
         myform = documentation_form()
     return render(request, 'documentation.html', {'form': myform, 
                                                   'context': context})
-

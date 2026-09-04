@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %} Upload quantum Hall device test points {% endblock %}
+
+{% block content %}
+<form class="col-md-12 offset-md-1" enctype="multipart/form-data" method="post" action= "{% url 'qconductance-upload' %}">
+{% csrf_token %}
+<br>
+<h6>Upload quantum conductance test points</h6> <input type="file" name="mdss_data_file[]" multiple>
+<button class="btn btn-secondary" type="submit">Upload File</button>
+<br><br>
+<h6>Progress: </h6>
+<div class='progress-wrapper dropdown' style="padding-top: 10px; padding-right: 800px;">
+  <div id='progress-bar' class='progress-bar' style="height: 30px; width: 80px; border-radius: 50px; padding-right: 0px; padding-left: 0px; background-color: #68a9ef;">&nbsp;</div>
+  <div class='dropdown' style="padding-right: 100px" id="progress-bar-message">&nbsp;
+    <script src="{% static 'celery_progress/celery_progress.js' %}"></script>
+  </div>
+</div>
+<div class="dropdown col-md-1 offset-md-6">
+{% if task_id %}
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    var progressUrl = "{% url 'celery_progress:task_status' task_id|safe %}";
+    CeleryProgressBar.initProgressBar(progressUrl);
+  });
+</script>
+{% endif %}
+</div>
+<br><br>
+<!--h6>Uploaded Files:</h6-->
+<!--{% for fn in fdata %}
+    {% for f in fn %}
+        <em>{{f}}&nbsp;</em>
+    {% endfor %}
+    <br>
+{% endfor %}
+</div-->
+</form>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends 'base.html'%}
+{% block title%} Search quantum Hall devices {% endblock %}
+{% block content %}
+<form class="col-md-12 offset-md-1" style="width: 30%;" method="post" onsubmit="openProcessTab()" action="{% url 'qconductance-search' %}" >
+    {% csrf_token %}
+    <br>
+    {{ form.as_p }}
+    <button type="submit" action="." value="download" name="download">Download</button> 
+</form>
+<script>
+function openProcessTab() {
+    setTimeout(() => {
+        const newSite = window.location.origin + '/process/';
+        window.open(newSite, '_blank');
+    }, 100);
+}
+</script>
+{% endblock %}

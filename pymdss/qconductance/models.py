@@ -1,16 +1,22 @@
 from django.db import models
 
+class filename(models.Model):
+    date_uploaded       = models.CharField(max_length=100, null=False, blank=True)
+    uploaded_filename   = models.TextField(null=False, blank=True)
+
+    def __str__(self):
+        return(self.uploaded_filename)
+
 class search_qconductance(models.Model):
     """[summary]
 
     Args:
         models ([type]): [description]
     """
-    serial              = models.CharField(db_column='Serial', max_length=20, null=False, blank=True, help_text='<em>Serial number of the standard</em>')
+    serial              = models.CharField(db_column='Serial', max_length=40, null=False, blank=True, help_text='<em>Serial number of the QHR device</em>')
     #model_no            = models.CharField(db_column='Model', max_length=20, null=False, blank=True, help_text='<em>Model number of the standard</em>')
     #std_manufacturer    = models.CharField(db_column='Standard Manufacturer', max_length=20, null=False, blank=True, help_text='<em>Manufacturer of the standard</em>')
-    nominal             = models.CharField(db_column='Nominal', max_length=20, null=True, blank=True, help_text='<em>Nominal standard value in ohms</em>')
-    service_id          = models.CharField(db_column='Service Id', max_length=20, null=False, blank=True, help_text='<em>NIST Service Identification</em>')
+    nominal             = models.CharField(db_column='Nominal (ohm)', max_length=20, null=True, blank=True, help_text='<em>Nominal standard value in ohms</em>')
     process_name        = models.CharField(db_column='Process name', max_length=30, null=False, blank=True, help_text='<em>Name of the process</em>')
     format              = models.CharField(db_column='Format', max_length=10, null=False, blank=True, help_text='<em>Download file format (xlsx if left blank)</em>')
 
@@ -18,8 +24,8 @@ class search_qconductance(models.Model):
         return self.serial
 
 # Create your models here.
-class Quantum_Conductance_Process(models.Model):
-    """Magnicon CCC fields
+class QHR_Process(models.Model):
+    """QHR Process fields 
 
     Args:
         models ([type]): [description]
@@ -65,12 +71,13 @@ class Quantum_Conductance_Process(models.Model):
     magnicon_com_temp       = models.FloatField(db_column='Magnicon com temp', blank=True, null=False)  # Field name made lowercase. Field renamed to remove unsuitable characters.
     magnicon_cn_temp        = models.FloatField(db_column='Magnicon cn temp', blank=True, null=False)  # Field name made lowercase. Field renamed to remove unsuitable characters.
     magnicon_nv_temp        = models.FloatField(db_column='Magnicon nv temp', blank=True, null=False)  # Field name made lowercase. Field renamed to remove unsuitable characters.
-    char_cryostat           = models.FloatField(db_column='Characterization cryostat', blank=True, null=False)  # Field name made lowercase. Field renamed to remove unsuitable characters.
-    magnetic_field          = models.FloatField(db_column='Magnetic field', blank=True, null=False)  # Field name made lowercase. Field renamed to remove unsuitable characters.
-    sample_temperature      = models.FloatField(db_column='Sample temperature', blank=True, null=False)  # Field name made lowercase. Field renamed to remove unsuitable characters.
     system_id               = models.CharField(db_column='System ID', blank=True, max_length=100)  # Field name made lowercase. Field renamed to remove unsuitable characters.
     service_id              = models.CharField(db_column='Service ID', blank=True, max_length=20)  # Field name made lowercase. Field renamed to remove unsuitable characters.
     process                 = models.CharField(db_column='Process', max_length=100, blank=True, null=False)  # Field name made lowercase.
+    magnetic_field          = models.FloatField(db_column='Magnetic field', blank=True, null=False)  # Field name made lowercase. Field renamed to remove unsuitable characters.
+    sample_temperature      = models.FloatField(db_column='Sample temperature', blank=True, null=False)  # Field name made lowercase. Field renamed to remove unsuitable characters.
+    contacts                = models.CharField(db_column='I and V probes (I+, I-, V+, V-)', max_length=20, blank=True, null=False)  # Field name made lowercase.
+    char_cryostat           = models.CharField(db_column='Characterization cryostat', max_length=20,  blank=True, null=False)  # Field name made lowercase. Field renamed to remove unsuitable characters.
     area                    = models.CharField(db_column='Area', max_length=20, blank=True, null=False)  # Field name made lowercase.
 
     def __str__(self):
