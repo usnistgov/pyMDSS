@@ -26,6 +26,7 @@ pip install django-crispy-forms`
     }
 }`
 CREATE DATABASE mdss
+CREATE USER 'mdss_user'@'localhost' IDENTIFIED BY 'mdss_user_1234';
 GRANT ALL PRIVILEGES ON *.* TO 'mdss_user'@'localhost' WITH GRANT OPTION;
 `python manage.py makemigrations`
 `python manage.py migrate`
