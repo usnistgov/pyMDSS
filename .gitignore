@@ -1,0 +1,19 @@
+# Secrets
+.env
+*.pem
+*.key
+*.crt
+
+# Database dumps (can contain every MySQL account's password hash)
+*.sql
+!pymdss/delete_resistors_tables.sql
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Django
+django_debug.log
+*.log
