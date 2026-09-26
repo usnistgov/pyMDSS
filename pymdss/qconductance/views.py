@@ -4,6 +4,7 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse, JsonResponse
 from .models import QHR_Process
 from .forms import calibration_area_form, search_qconductance_form
+from resistors.data_handler import build_search_query
 from django.views import View
 from django.views.generic.edit import FormView
 from django.shortcuts import get_object_or_404
@@ -210,55 +211,25 @@ def get_all_tables():
 
 def fetch_data(request, mydict):
     db_conn = connections['default']
-    keys = list(mydict.keys())
     search_params = list(mydict.values())
     tables = get_all_tables()
     cursor = db_conn.cursor()
     header = []
     results = []
     table_names = []
-    mycol = []
     nrows = 0
     cache.set(f"nrows_{request.session.session_key}", nrows, timeout=3600)
     for table in tables:
         if  table.startswith('qconductance') and \
             table != ('qconductance_search_qconductance') and \
             table != ('qconductance_filename'):
-            i=1
-            #print("Table name: ", table)
-            cursor.execute(f"DESCRIBE {table}")
+            cursor.execute(f"DESCRIBE `{table}`")
             columns = [column[0] for column in cursor.fetchall()] # column list of all models
-            param = []
-            for val in search_params:
-                if val:
-                    i+=1
-                    param.append(f"{val}")
-            #print("Column names: ", columns)
-            param_final = param
-            query = "SELECT * FROM {} WHERE ".format(table)
-            conditions = []
-            # Generate the mysql query...
-            for column in columns:
-                for key in keys:
-                    if mydict[key]:
-                        if column == key:
-                            mycol.append(column)
-            #print ('Column: ', mycol)
-            if len(param) == 1:
-                conditions.append("BINARY `{}`=%s".format(mycol[0]))
-            elif len(param) == 2:
-                conditions.append("`{}` LIKE %s".format(mycol[0]) + " AND " + "`{}` LIKE %s".format(mycol[1]))
-            elif len(param) == 3:
-                conditions.append("`{}` LIKE %s".format(mycol[0]) + " AND " + "`{}` LIKE %s".format(mycol[1]) + " AND " + "`{}` LIKE %s".format(mycol[2]))
-            elif len(param) == 4:
-                conditions.append("`{}` LIKE %s".format(mycol[0]) + " AND " + "`{}` LIKE %s".format(mycol[1]) + " AND " + "`{}` LIKE %s".format(mycol[2]) + " AND " + "`{}` LIKE %s".format(mycol[3]))
-            query += " OR ".join(conditions)
-            param_final =  tuple(param_final)
-            #param = (f"%{keyword_1}%", f"%{keyword_2}%", )*len(columns)
-            #print(query)
-            #print (param_final)
+            search_query = build_search_query(table, columns, mydict)
+            if search_query is None:
+                continue
             # execute the mysql query and fetch the results...
-            cursor.execute(query, param_final)
+            cursor.execute(*search_query)
             table_results = cursor.fetchall()
             nrows += len(table_results)
             cache.set(f"nrows_{request.session.session_key}", nrows, timeout=3600)
