@@ -97,8 +97,8 @@ def handle_uploaded_file(self, encoded_file_data, encoded_file_name):
     db_conn = connections['default']
     cursor = db_conn.cursor()
     progress_recorder = ProgressRecorder(self)
-    pass_flag = 1
     for ct, file_data in enumerate(encoded_file_data):
+        pass_flag = 1  # reset per file, so one bad file doesn't mark the rest as failed
         # First check if the file was uploaded before...
         query  = """SELECT uploaded_filename FROM qconductance_filename WHERE uploaded_filename = "{}" """.format(encoded_file_name[ct])
         cursor.execute(query)
@@ -116,16 +116,24 @@ def handle_uploaded_file(self, encoded_file_data, encoded_file_name):
                         if i[-1] == '' or i[-1] == '\r' or i[-1] == '\n' or i[-1] =='\r\n':
                             i.pop(-1)
                         if 'QHR Process' in i:
+                            # Values map to QHR_Process fields by position, so the
+                            # file columns must follow the model's field order.
                             if len(i) == 50:
-                                i[2] = datetime.datetime.strptime(i[2], '%m/%d/%Y %I:%M:%S %p').replace(tzinfo=ZoneInfo("UTC"))
-                                try:   
-                                    i[3] = datetime.datetime.strptime(i[3], '%m/%d/%Y %I:%M:%S %p').replace(tzinfo=ZoneInfo("UTC"))
-                                except Exception as e:
-                                    i[3] = datetime.datetime.strptime(i[3], '%m/%d/%Y %I:%M %p').replace(tzinfo=ZoneInfo("UTC"))
-                                    pass 
-                                myobj = QHR_Process(*i)
-                                myobj.id = None
-                                myobj.save()
+                                # Old file format, from before carrier density was recorded
+                                i.insert(49, None)
+                            if len(i) != 51:
+                                raise ValueError(f"QHR line has {len(i) - 1} values, expected 49 or 50")
+                            if i[49] == '':
+                                i[49] = None  # carrier density not measured
+                            i[2] = datetime.datetime.strptime(i[2], '%m/%d/%Y %I:%M:%S %p').replace(tzinfo=ZoneInfo("UTC"))
+                            try:
+                                i[3] = datetime.datetime.strptime(i[3], '%m/%d/%Y %I:%M:%S %p').replace(tzinfo=ZoneInfo("UTC"))
+                            except Exception as e:
+                                i[3] = datetime.datetime.strptime(i[3], '%m/%d/%Y %I:%M %p').replace(tzinfo=ZoneInfo("UTC"))
+                                pass
+                            myobj = QHR_Process(*i)
+                            myobj.id = None
+                            myobj.save()
                 except Exception as e:
                     print('Error: ', e)
                     pass_flag = 0
