@@ -1,5 +1,47 @@
 # Release notes
 
+## Unreleased
+
+Security hardening, upload and search fixes, and QHR measurements in the admin. No database migration.
+
+### New
+
+- **QHR measurements in the admin.** `/admin/` now lists QHR measurements with their date, serial, nominal value, cryostat, carrier density, sample temperature, magnetic field and service ID. They can be searched by serial, service ID or reference serial, and filtered by cryostat and date. Staff users need the "Can view qhr_ process" permission; superusers see everything.
+
+### Security
+
+- **Every page now requires logging in**, except the login page, the admin's own login page and static files. Anonymous visitors are sent to the login page.
+- **The Django secret key is no longer in the code.** It is read from `DJANGO_SECRET_KEY` in `.env`, and the app stops with a clear error if it is missing. The old key was public, so every installation needs a new one.
+- **The database password was removed from `help.md`.** It is still in the git history, so change it on every server.
+- **Only known host names are accepted.** `ALLOWED_HOSTS` no longer contains `"*"`; other names get "Bad Request (400)". Extra names can be added with `DJANGO_EXTRA_ALLOWED_HOSTS` in `.env`.
+
+### Fixed
+
+- **One failed file in a multi-file standard resistor upload marked all later files as failed.** Their rows were saved but their file names were not recorded, so uploading them again duplicated data. (QHR uploads were fixed in 1.0.)
+- **Magnicon CCC and MI 6010SW lines with the wrong number of values were skipped silently** while the file was reported as uploaded. Such a file is now rejected with an error and can be re-uploaded once fixed.
+- **A file uploaded in the wrong calibration area was reported as uploaded, but nothing was saved.** For example, resistor data uploaded on the quantum conductance page. Its name was recorded, so uploading it again there said "Already processed". Such a file is now rejected before anything is saved, with a message naming the process it contains and the calibration area it belongs in. Files with processes pyMDSS doesn't store, and files that aren't text, are reported the same way.
+- **Upload results always said "Success!" on a green bar**, even when a file failed, and all messages ran together. Each file's result is now on its own line, with the reason when it failed, and the bar turns red if any file failed.
+- **A search that found nothing downloaded an empty Excel file.** The search page now stays open with "No records found for …" and keeps what was typed. Searches with results download as before.
+- **Upload status could fail depending on the order the code loaded.** The code created three extra Celery apps besides the project's own, and whichever was created last became the "current" one. One of them had no place to store task results, so looking up a task's progress failed with `DisabledBackend`. The extra apps are gone.
+
+### Upgrading from 1.0
+
+1. **Before pulling**, add a new secret key to the server's `pymdss/pymdss/.env`, in the same style as the other lines. Generate it with `python -c "import secrets; print(secrets.token_urlsafe(50))"`. Without it, the web server, the Celery worker and `manage.py` stop with "DJANGO_SECRET_KEY is not set".
+2. Change the database password (`ALTER USER 'mdss_user'@'localhost' IDENTIFIED BY '<new password>';`) and put the new one in `DB_USER_PASSWORD` in `.env`.
+3. Pull the new code, then stop and start the web server and the Celery worker. The web server's automatic reload keeps the old `.env` values.
+4. Everyone is logged out once, because the secret key changed.
+5. If people reach the site by a name other than `pymdss.campus.nist.gov`, `pg902544.campus.nist.gov` or `129.6.124.172`, add it to `DJANGO_EXTRA_ALLOWED_HOSTS`.
+
+### Tested
+
+On the same setup as 1.0: 30 temporary automated tests on MySQL, covering every change above and the 1.0 carrier density file formats. Those are login, secret key and host names; resistor and QHR uploads, including files in the wrong calibration area; searches with and without results; the QHR admin pages; and the single Celery app. Also checked live against a running HTTPS server and Celery worker with the restored production data: login, searches, the QHR admin search and filters, and uploads in the wrong calibration area. The upload result display was tested with the progress bar library the app serves, and the calibration-area check with the NIST AAB data files in `media/`.
+
+### Known issues
+
+- If a file fails partway through an upload, the lines before the failing one are still saved. Uploading the corrected file then adds those lines a second time. This applies to all uploads.
+
+These changes were also developed with AI assistance (Claude, in Claude Code), as described under 1.0.
+
 ## 1.0 (2026-09-26)
 
 This release fixes the search page, adds carrier density to quantized Hall resistance (QHR) measurements, and documents how to set up and run pyMDSS. It includes one database migration.
