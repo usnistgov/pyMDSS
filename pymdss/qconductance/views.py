@@ -4,7 +4,7 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse, JsonResponse
 from .models import QHR_Process
 from .forms import calibration_area_form, search_qconductance_form
-from resistors.data_handler import build_search_query, read_upload
+from resistors.data_handler import build_search_query, describe_search, read_upload
 from django.views import View
 from django.views.generic.edit import FormView
 from django.shortcuts import get_object_or_404
@@ -190,6 +190,9 @@ def qconductance_search(request):
                           'Format': format,
                          }
                 response = fetch_data(request, mydict)
+                if response is None:
+                    messages.warning(request, f"No records found for {describe_search(mydict)}.")
+                    return render(request, 'qconductance-search.html', {'form': search_data_form})
                 return response
             else:
                 search_data_form = search_qconductance_form()     
@@ -252,6 +255,8 @@ def fetch_data(request, mydict):
                 table_names.append(table)
                 header.append([row[0] for row in cursor.description])
     cursor.close()
+    if nrows == 0:
+        return None  # nothing found: the search view says so instead of sending an empty file
     #print("rows: ", nrows)
     request.session['nrows'] = str(nrows)
     #export_xlsxwriter(header, results, mydict, table_names)

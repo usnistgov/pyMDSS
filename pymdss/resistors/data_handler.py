@@ -28,6 +28,10 @@ def build_search_query(table, columns, mydict):
     params = tuple(f"{val}" for val in search_terms.values())
     return query, params
 
+def describe_search(mydict):
+    """The filled-in search fields as text, e.g. "Serial 31650, Process MI 6010C Process"."""
+    return ', '.join(f"{key} {val}" for key, val in mydict.items() if key != 'Format' and val)
+
 # Processes each calibration area's upload handler stores. Keep in step with the
 # 'X Process' branches in resistors/views.py and qconductance/views.py.
 UPLOAD_PROCESSES = {

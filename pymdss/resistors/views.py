@@ -7,7 +7,7 @@ from .models import Magnicon_CCC_Process, Thomas_Process, Warshawsky_Process, \
                     document, search_standard_resistor
 from django.core.files.storage import FileSystemStorage
 from .forms import documentation_form, calibration_area_form, search_standard_resistor_form
-from resistors.data_handler import delete_records, build_search_query, read_upload
+from resistors.data_handler import delete_records, build_search_query, describe_search, read_upload
 from pymdss.middleware import login_not_required
 from django.views import View
 from django.views.generic.edit import FormView
@@ -302,6 +302,9 @@ def search(request):
                           'Format': format,
                          }
                 response = fetch_data(request, mydict)
+                if response is None:
+                    messages.warning(request, f"No records found for {describe_search(mydict)}.")
+                    return render(request, 'search.html', {'form': search_data_form})
                 return response
             else:
                 search_data_form = search_standard_resistor_form()
@@ -369,6 +372,8 @@ def fetch_data(request, mydict):
                 table_names.append(table)
                 header.append([row[0] for row in cursor.description])
     cursor.close()
+    if nrows == 0:
+        return None  # nothing found: the search view says so instead of sending an empty file
     #print("rows: ", nrows)
     #export_xlsxwriter(header, results, mydict, table_names)
     if search_params[-1] == 'xlsx':
