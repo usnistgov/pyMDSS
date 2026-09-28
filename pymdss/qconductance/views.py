@@ -17,7 +17,7 @@ import django.apps
 from io import BytesIO
 import openpyxl
 import datetime
-from celery import shared_task, Celery
+from celery import shared_task
 from celery_progress.backend import ProgressRecorder
 from django.core.serializers import serialize, deserialize
 from celery.result import AsyncResult
@@ -26,8 +26,6 @@ from django.core.cache import cache
 
 import logging
 logger = logging.getLogger(__name__)
-
-celery_app = Celery('pymdss', backend="django-db")
 
 # Create your views here.
 def index(request):
