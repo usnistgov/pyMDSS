@@ -8,6 +8,7 @@ from .models import Magnicon_CCC_Process, Thomas_Process, Warshawsky_Process, \
 from django.core.files.storage import FileSystemStorage
 from .forms import documentation_form, calibration_area_form, search_standard_resistor_form
 from resistors.data_handler import delete_records, build_search_query
+from pymdss.middleware import login_not_required
 from django.views import View
 from django.views.generic.edit import FormView
 #from .admin import PostMagniconCCC
@@ -47,6 +48,7 @@ def process(request):
 def index(request):
     return render(request, 'index.html')
 
+@login_not_required
 def home(request):
     if request.method == 'POST':
         username = request.POST['username']

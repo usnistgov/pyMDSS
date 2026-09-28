@@ -20,13 +20,13 @@ pip install django-crispy-forms`
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'mdss',
         'USER': 'mdss_user',
-        'PASSWORD': 'mdss_user_1234',
+        'PASSWORD': '<password>',
         'HOST': 'localhost',
         'PORT': '3306',
     }
 }`
 CREATE DATABASE mdss
-CREATE USER 'mdss_user'@'localhost' IDENTIFIED BY 'mdss_user_1234';
+CREATE USER 'mdss_user'@'localhost' IDENTIFIED BY '<password>';
 GRANT ALL PRIVILEGES ON *.* TO 'mdss_user'@'localhost' WITH GRANT OPTION;
 `python manage.py makemigrations`
 `python manage.py migrate`

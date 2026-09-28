@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 from pathlib import Path
 import os
 from dotenv import load_dotenv
+from django.core.exceptions import ImproperlyConfigured
 from socket import gethostname, gethostbyname
 
 load_dotenv()
@@ -24,16 +25,23 @@ print ('BASE_DIR', BASE_DIR)
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-_b$$cn--cm5q@kzi6tc58ah#f)6ts0shnj7mkzc7i23p12$xy1'
+# It is read from DJANGO_SECRET_KEY in .env; generate one with
+#   python -c "import secrets; print(secrets.token_urlsafe(50))"
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
+if not SECRET_KEY:
+    raise ImproperlyConfigured(
+        "DJANGO_SECRET_KEY is not set. Add it to pymdss/pymdss/.env (see README.md).")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
-ALLOWED_HOSTS = ["*",
-                 "pymdss.campus.nist.gov", 
+ALLOWED_HOSTS = ["pymdss.campus.nist.gov",
                  "pymdss.campus.nist.gov.local",
-                 "129.6.124.172", 
+                 "pg902544.campus.nist.gov",
+                 "129.6.124.172",
                  "localhost",
                  "127.0.0.1",]
+# Other names this machine is reached by, comma-separated, e.g. DJANGO_EXTRA_ALLOWED_HOSTS=host1,host2
+ALLOWED_HOSTS += [host.strip() for host in os.getenv('DJANGO_EXTRA_ALLOWED_HOSTS', '').split(',') if host.strip()]
 #SERVER_DOMAIN = "https://pymdss.campus.nist.gov"
 
 CSRF_TRUSTED_ORIGINS = [
@@ -69,9 +77,13 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'pymdss.middleware.LoginRequiredMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+# Where LoginRequiredMiddleware sends anonymous users
+LOGIN_URL = 'home'
 
 ROOT_URLCONF = 'pymdss.urls'
 

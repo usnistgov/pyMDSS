@@ -53,17 +53,33 @@ FLUSH PRIVILEGES;
 
 ## 3. Create the `.env` file
 
-`settings.py` reads the database connection details from environment variables through `python-dotenv`. Create `pymdss/pymdss/.env` (next to `settings.py`) with the lines below. `pymdss/.env` next to `manage.py` also works, but if both exist the one next to `settings.py` wins.
+`settings.py` reads the Django secret key and the database connection details from environment variables through `python-dotenv`. Create `pymdss/pymdss/.env` (next to `settings.py`) with the lines below. `pymdss/.env` next to `manage.py` also works, but if both exist the one next to `settings.py` wins.
 
 ```ini
+DJANGO_SECRET_KEY=<long-random-string>
 DB_NAME=mdss
 DB_USER=mdss_user
 DB_USER_PASSWORD=<choose-a-password>
 DB_HOST=localhost
 ```
 
+Generate the secret key with:
+
+```bash
+python -c "import secrets; print(secrets.token_urlsafe(50))"
+```
+
+If people reach the server by a host name that isn't listed in `ALLOWED_HOSTS` in `settings.py`, add it (comma-separated for several) instead of editing the code:
+
+```ini
+DJANGO_EXTRA_ALLOWED_HOSTS=myhost.campus.nist.gov
+```
+
 > `.env` must never be committed. Without it, every `manage.py` command fails with
-> `AttributeError: 'NoneType' object has no attribute 'startswith'`.
+> `ImproperlyConfigured: DJANGO_SECRET_KEY is not set`.
+>
+> After changing `.env`, fully restart the web server and the Celery worker. The web server's
+> automatic reload keeps the old values.
 
 ## 4. Initialize the database
 
@@ -157,7 +173,7 @@ The `start_*.bat` files in the repository root run the commands above. They `cd`
 
 ## Using the app
 
-1. Log in on the home page with the superuser, or with any user created in `/admin/`.
+1. Log in on the home page with the superuser, or with any user created in `/admin/`. Every other page requires logging in.
 2. Choose a calibration area (Resistors or Quantized Conductance).
 3. **Upload** pipe-delimited (`|`) MDSS data files. Processing runs in Celery and a progress bar shows its status. A file whose name was already uploaded is skipped.
 4. **Search** by serial, nominal value, process or service ID, then download the results as `.xlsx`.
@@ -182,7 +198,10 @@ See [help.md](help.md) for the original setup notes.
 
 | Symptom | Cause |
 |---|---|
-| `'NoneType' object has no attribute 'startswith'` | `pymdss/.env` is missing or the DB variables in it are misspelled |
+| `DJANGO_SECRET_KEY is not set` | `pymdss/pymdss/.env` is missing, or has no `DJANGO_SECRET_KEY` line |
+| `'NoneType' object has no attribute 'startswith'` | The DB variables in `.env` are missing or misspelled |
+| `Access denied for user 'mdss_user'@'localhost'` right after changing `.env` | The web server or Celery worker is still using the old password. Stop and start them again |
+| `Bad Request (400)` | The host name in the address bar isn't allowed. Add it to `DJANGO_EXTRA_ALLOWED_HOSTS` in `.env` |
 | `Error 10061 connecting to localhost:6379` | Redis is not running |
 | `MySQL 8.4 or later is required (found 8.0.x)` | Django 6 is installed. Run `pip install "django>=5.2,<5.3"` |
 | `unknown command 'HELLO'` | redis-py 6 or later is installed but the Redis server is 3.x. Run `pip install "redis>=5.0.3,<6"` |
