@@ -4,7 +4,7 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse, JsonResponse
 from .models import QHR_Process
 from .forms import calibration_area_form, search_qconductance_form
-from resistors.data_handler import build_search_query
+from resistors.data_handler import build_search_query, read_upload
 from django.views import View
 from django.views.generic.edit import FormView
 from django.shortcuts import get_object_or_404
@@ -106,7 +106,11 @@ def handle_uploaded_file(self, encoded_file_data, encoded_file_name):
         num_rows = cursor.rowcount
         #print(result, num_rows)
         if num_rows <= 0:
-            mylist = file_data.decode('utf-8').split('\n')
+            # Refuse files with data for another calibration area before saving anything
+            mylist, reason = read_upload(file_data, 'quantum conductance')
+            if reason:
+                print('Error: ', reason)
+                pass_flag = 0
             #print('mylist', mylist)
             for data in mylist:
                 try:
@@ -137,6 +141,7 @@ def handle_uploaded_file(self, encoded_file_data, encoded_file_name):
                 except Exception as e:
                     print('Error: ', e)
                     pass_flag = 0
+                    reason = str(e)
                     #msg = 'Error processing file: ' + encoded_file_name[ct]
                     #return(msg)
                     break
@@ -146,7 +151,7 @@ def handle_uploaded_file(self, encoded_file_data, encoded_file_name):
                 cursor.execute(query, (datetime.datetime.now().strftime("%d%m%Y_%H%M%S"), encoded_file_name[ct]))
                 uploaded_filenames.append(encoded_file_name[ct])
             else:
-                error_filenames.append(encoded_file_name[ct])    
+                error_filenames.append(f"{encoded_file_name[ct]} ({reason})")
         else:
             already_processed_filenames.append(encoded_file_name[ct])       
         progress_recorder.set_progress(int(((ct+1)/len(encoded_file_data))*100), 100)

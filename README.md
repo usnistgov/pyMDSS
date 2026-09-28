@@ -175,7 +175,7 @@ The `start_*.bat` files in the repository root run the commands above. They `cd`
 
 1. Log in on the home page with the superuser, or with any user created in `/admin/`. Every other page requires logging in.
 2. Choose a calibration area (Resistors or Quantized Conductance).
-3. **Upload** pipe-delimited (`|`) MDSS data files. Processing runs in Celery and a progress bar shows its status. A file whose name was already uploaded is skipped.
+3. **Upload** pipe-delimited (`|`) MDSS data files. Processing runs in Celery and a progress bar shows its status, then one result line per file; the bar turns red if a file failed. A file whose name was already uploaded is skipped. A file with data for another calibration area (for example resistor data on the quantum conductance page) is rejected with a message saying where it belongs, and nothing from it is saved.
 4. **Search** by serial, nominal value, process or service ID, then download the results as `.xlsx`.
 5. **Documentation** shows the row count for each table.
 

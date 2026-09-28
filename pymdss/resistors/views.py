@@ -7,7 +7,7 @@ from .models import Magnicon_CCC_Process, Thomas_Process, Warshawsky_Process, \
                     document, search_standard_resistor
 from django.core.files.storage import FileSystemStorage
 from .forms import documentation_form, calibration_area_form, search_standard_resistor_form
-from resistors.data_handler import delete_records, build_search_query
+from resistors.data_handler import delete_records, build_search_query, read_upload
 from pymdss.middleware import login_not_required
 from django.views import View
 from django.views.generic.edit import FormView
@@ -119,8 +119,8 @@ def handle_uploaded_file(self, encoded_file_data, encoded_file_name):
     db_conn = connections['default']
     cursor = db_conn.cursor()
     progress_recorder = ProgressRecorder(self)
-    pass_flag = 1
     for ct, file_data in enumerate(encoded_file_data):
+        pass_flag = 1  # reset per file, so one bad file doesn't mark the rest as failed
         # First check if the file was uploaded before...
         query  = """SELECT uploaded_filename FROM resistors_filename WHERE uploaded_filename = "{}" """.format(encoded_file_name[ct])
         cursor.execute(query)
@@ -128,7 +128,11 @@ def handle_uploaded_file(self, encoded_file_data, encoded_file_name):
         num_rows = cursor.rowcount
         #print(result, num_rows)
         if num_rows <= 0:
-            mylist = file_data.decode('utf-8').split('\n')
+            # Refuse files with data for another calibration area before saving anything
+            mylist, reason = read_upload(file_data, 'standard resistor')
+            if reason:
+                print('Error: ', reason)
+                pass_flag = 0
             #print('mylist', mylist)
             for data in mylist:
                 try:
@@ -138,16 +142,17 @@ def handle_uploaded_file(self, encoded_file_data, encoded_file_name):
                         if i[-1] == '' or i[-1] == '\r' or i[-1] == '\n' or i[-1] =='\r\n':
                             i.pop(-1)
                         if 'Magnicon CCC Process' in i:
-                            if len(i) == 46:
-                                i[2] = datetime.datetime.strptime(i[2], '%m/%d/%Y %I:%M:%S %p').replace(tzinfo=ZoneInfo("UTC"))
-                                try:   
-                                    i[3] = datetime.datetime.strptime(i[3], '%m/%d/%Y %I:%M:%S %p').replace(tzinfo=ZoneInfo("UTC"))
-                                except Exception as e:
-                                    i[3] = datetime.datetime.strptime(i[3], '%m/%d/%Y %I:%M %p').replace(tzinfo=ZoneInfo("UTC"))
-                                    pass 
-                                myobj = Magnicon_CCC_Process(*i)
-                                myobj.id = None
-                                myobj.save()
+                            if len(i) != 46:
+                                raise ValueError(f"Magnicon CCC line has {len(i) - 1} values, expected 45")
+                            i[2] = datetime.datetime.strptime(i[2], '%m/%d/%Y %I:%M:%S %p').replace(tzinfo=ZoneInfo("UTC"))
+                            try:
+                                i[3] = datetime.datetime.strptime(i[3], '%m/%d/%Y %I:%M:%S %p').replace(tzinfo=ZoneInfo("UTC"))
+                            except Exception as e:
+                                i[3] = datetime.datetime.strptime(i[3], '%m/%d/%Y %I:%M %p').replace(tzinfo=ZoneInfo("UTC"))
+                                pass
+                            myobj = Magnicon_CCC_Process(*i)
+                            myobj.id = None
+                            myobj.save()
                         elif 'Thomas Process' in i:
                                 #print('In Thomas process')
                                 try:
@@ -191,16 +196,17 @@ def handle_uploaded_file(self, encoded_file_data, encoded_file_name):
                             myobj.id = None
                             myobj.save()
                         elif 'MI 6010SW Process' in i:
-                            if len(i) == 21:
-                                try:
-                                    i[2] = datetime.datetime.strptime(i[2], '%m-%d-%Y %H:%M:%S').replace(tzinfo=ZoneInfo("UTC"))
-                                except Exception as e:
-                                    i[2] = datetime.datetime.strptime(i[2], '%m/%d/%Y %I:%M:%S %p').replace(tzinfo=ZoneInfo("UTC"))
-                                    pass
-                                i[3] = datetime.datetime.strptime(i[3], '%H:%M:%S').replace(tzinfo=ZoneInfo("UTC"))
-                                myobj = MI_6010SW_Process(*i)
-                                myobj.id = None
-                                myobj.save()
+                            if len(i) != 21:
+                                raise ValueError(f"MI 6010SW line has {len(i) - 1} values, expected 20")
+                            try:
+                                i[2] = datetime.datetime.strptime(i[2], '%m-%d-%Y %H:%M:%S').replace(tzinfo=ZoneInfo("UTC"))
+                            except Exception as e:
+                                i[2] = datetime.datetime.strptime(i[2], '%m/%d/%Y %I:%M:%S %p').replace(tzinfo=ZoneInfo("UTC"))
+                                pass
+                            i[3] = datetime.datetime.strptime(i[3], '%H:%M:%S').replace(tzinfo=ZoneInfo("UTC"))
+                            myobj = MI_6010SW_Process(*i)
+                            myobj.id = None
+                            myobj.save()
                         elif 'MI 6000B Process' in i:
                             i[2] = datetime.datetime.strptime(i[2], '%m/%d/%Y %I:%M:%S %p').replace(tzinfo=ZoneInfo("UTC"))
                             try:
@@ -245,6 +251,7 @@ def handle_uploaded_file(self, encoded_file_data, encoded_file_name):
                 except Exception as e:
                     print('Error: ', e)
                     pass_flag = 0
+                    reason = str(e)
                     #msg = 'Error processing file: ' + encoded_file_name[ct]
                     #return(msg)
                     break
@@ -254,7 +261,7 @@ def handle_uploaded_file(self, encoded_file_data, encoded_file_name):
                 cursor.execute(query, (datetime.datetime.now().strftime("%d%m%Y_%H%M%S"), encoded_file_name[ct]))
                 uploaded_filenames.append(encoded_file_name[ct])
             else:
-                error_filenames.append(encoded_file_name[ct])    
+                error_filenames.append(f"{encoded_file_name[ct]} ({reason})")
         else:
             already_processed_filenames.append(encoded_file_name[ct])       
         progress_recorder.set_progress(int(((ct+1)/len(encoded_file_data))*100), 100)

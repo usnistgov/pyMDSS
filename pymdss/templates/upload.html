@@ -18,10 +18,11 @@
 </div>
 
 {% if task_id %}
+{% include 'upload_result.html' %}
 <script>
   document.addEventListener("DOMContentLoaded", function() {
     var progressUrl = "{% url 'celery_progress:task_status' task_id|safe %}";
-    CeleryProgressBar.initProgressBar(progressUrl);
+    CeleryProgressBar.initProgressBar(progressUrl, {onSuccess: showUploadResult});
   });
 </script>
 {% endif %}

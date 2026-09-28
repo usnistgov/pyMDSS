@@ -1,0 +1,10 @@
+<script>
+  // Progress bar onSuccess handler for the upload pages: show each file's result
+  // on its own line, and turn the bar red if any file couldn't be uploaded.
+  function showUploadResult(progressBarElement, progressBarMessageElement, result) {
+    var lines = [].concat(result || []).map(function (line) { return String(line).trim(); });
+    var failed = lines.some(function (line) { return line.indexOf('Error') === 0; });
+    progressBarElement.style.backgroundColor = failed ? this.barColors.error : this.barColors.success;
+    progressBarMessageElement.innerText = lines.join('\n');
+  }
+</script>
