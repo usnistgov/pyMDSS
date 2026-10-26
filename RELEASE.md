@@ -2,9 +2,11 @@
 
 ## Unreleased
 
-Security hardening, upload and search fixes, and QHR measurements in the admin. No database migration.
+Security hardening, upload and search fixes, QHR measurements in the admin, and carrier mobility for QHR measurements. Includes one database migration (`qconductance.0007`).
 
 ### New
+
+- **Carrier mobility for QHR measurements.** `QHR_Process` has a new optional `carrier_mobility` field, stored in the column `Carrier mobility` right after `Carrier density`; existing rows have no value (NULL). QHR uploads now accept three file formats: 49 values per line (oldest), 50 values (with carrier density) and 51 values (with carrier density and then carrier mobility). Blank values are stored as empty. The admin list shows the new column.
 
 - **QHR measurements in the admin.** `/admin/` now lists QHR measurements with their date, serial, nominal value, cryostat, carrier density, sample temperature, magnetic field and service ID. They can be searched by serial, service ID or reference serial, and filtered by cryostat and date. Staff users need the "Can view qhr_ process" permission; superusers see everything.
 
@@ -28,13 +30,18 @@ Security hardening, upload and search fixes, and QHR measurements in the admin. 
 
 1. **Before pulling**, add a new secret key to the server's `pymdss/pymdss/.env`, in the same style as the other lines. Generate it with `python -c "import secrets; print(secrets.token_urlsafe(50))"`. Without it, the web server, the Celery worker and `manage.py` stop with "DJANGO_SECRET_KEY is not set".
 2. Change the database password (`ALTER USER 'mdss_user'@'localhost' IDENTIFIED BY '<new password>';`) and put the new one in `DB_USER_PASSWORD` in `.env`.
-3. Pull the new code, then stop and start the web server and the Celery worker. The web server's automatic reload keeps the old `.env` values.
-4. Everyone is logged out once, because the secret key changed.
-5. If people reach the site by a name other than `pymdss.campus.nist.gov`, `pg902544.campus.nist.gov` or `129.6.124.172`, add it to `DJANGO_EXTRA_ALLOWED_HOSTS`.
+3. Stop the web server and the Celery worker, back up the `mdss` database, and pull the new code.
+4. From `pymdss/`, run `python manage.py migrate`. It applies `qconductance.0007_qhr_process_carrier_mobility`.
+5. Start the web server and the Celery worker. Start them after the migration and don't rely on the web server's automatic reload, which keeps the old `.env` values.
+6. Everyone is logged out once, because the secret key changed.
+7. If people reach the site by a name other than `pymdss.campus.nist.gov`, `pg902544.campus.nist.gov` or `129.6.124.172`, add it to `DJANGO_EXTRA_ALLOWED_HOSTS`.
+8. Switch the measurement software to write carrier mobility right after carrier density only after the migration. Files without it are still accepted.
+
+To roll back the carrier mobility change only, run `python manage.py migrate qconductance 0006` before checking out older code. This removes the `Carrier mobility` column and any values in it.
 
 ### Tested
 
-On the same setup as 1.0: 30 temporary automated tests on MySQL, covering every change above and the 1.0 carrier density file formats. Those are login, secret key and host names; resistor and QHR uploads, including files in the wrong calibration area; searches with and without results; the QHR admin pages; and the single Celery app. Also checked live against a running HTTPS server and Celery worker with the restored production data: login, searches, the QHR admin search and filters, and uploads in the wrong calibration area. The upload result display was tested with the progress bar library the app serves, and the calibration-area check with the NIST AAB data files in `media/`.
+On the same setup as 1.0: 30 temporary automated tests on MySQL, covering every change above and the 1.0 carrier density file formats. Those are login, secret key and host names; resistor and QHR uploads, including files in the wrong calibration area; searches with and without results; the QHR admin pages; and the single Celery app. Also checked live against a running HTTPS server and Celery worker with the restored production data: login, searches, the QHR admin search and filters, and uploads in the wrong calibration area. The upload result display was tested with the progress bar library the app serves, and the calibration-area check with the NIST AAB data files in `media/`. Carrier mobility: 9 more temporary tests on MySQL (all three QHR file formats, blank and wrong-length lines, the column position, the Excel export and admin list, and rolling the migration back and forward).
 
 ### Known issues
 

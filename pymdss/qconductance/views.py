@@ -121,12 +121,16 @@ def handle_uploaded_file(self, encoded_file_data, encoded_file_name):
                             # Values map to QHR_Process fields by position, so the
                             # file columns must follow the model's field order.
                             if len(i) == 50:
-                                # Old file format, from before carrier density was recorded
-                                i.insert(49, None)
-                            if len(i) != 51:
-                                raise ValueError(f"QHR line has {len(i) - 1} values, expected 49 or 50")
-                            if i[49] == '':
-                                i[49] = None  # carrier density not measured
+                                # Oldest format, from before carrier density and mobility were recorded
+                                i[49:49] = [None, None]
+                            elif len(i) == 51:
+                                # Format with carrier density, from before carrier mobility was recorded
+                                i.insert(50, None)
+                            if len(i) != 52:
+                                raise ValueError(f"QHR line has {len(i) - 1} values, expected 49, 50 or 51")
+                            for k in (49, 50):
+                                if i[k] == '':
+                                    i[k] = None  # not measured
                             i[2] = datetime.datetime.strptime(i[2], '%m/%d/%Y %I:%M:%S %p').replace(tzinfo=ZoneInfo("UTC"))
                             try:
                                 i[3] = datetime.datetime.strptime(i[3], '%m/%d/%Y %I:%M:%S %p').replace(tzinfo=ZoneInfo("UTC"))

@@ -79,6 +79,7 @@ class QHR_Process(models.Model):
     contacts                = models.CharField(db_column='I and V probes (I+, I-, V+, V-)', max_length=20, blank=True, null=False)  # Field name made lowercase.
     char_cryostat           = models.CharField(db_column='Characterization cryostat', max_length=20,  blank=True, null=False)  # Field name made lowercase. Field renamed to remove unsuitable characters.
     carrier_density         = models.FloatField(db_column='Carrier density', blank=True, null=True)  # NULL for rows uploaded before carrier density was recorded.
+    carrier_mobility        = models.FloatField(db_column='Carrier mobility', blank=True, null=True)  # NULL for rows uploaded before carrier mobility was recorded.
     area                    = models.CharField(db_column='Area', max_length=20, blank=True, null=False)  # Field name made lowercase.
 
     def __str__(self):
